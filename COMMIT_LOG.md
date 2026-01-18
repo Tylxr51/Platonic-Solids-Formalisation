@@ -1,6 +1,10 @@
 # Commit Log
 
-#### 17/01/26
+#### 18.01.26
+
+- Added comments to the simple graph theory page
+
+#### 17.01.26
 
 - Proved a directed version of the handshaking lemma. Shouldn't be too hard to translate into the true undirected version
 
