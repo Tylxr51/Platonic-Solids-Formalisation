@@ -1,5 +1,9 @@
 # Commit Log
 
+#### 25.01.26
+
+- Added definitions and basic lemmas over the last few days for unordered graphs to try prove the handshake lemma using set-up from the simple graph theory file
+- Currently sorry-ed a lemma while thhinking about the proof for it
 #### 18.01.26
 
 - Added comments to the simple graph theory page
