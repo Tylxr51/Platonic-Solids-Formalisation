@@ -7,14 +7,16 @@ import MA4N1_Platonic_Solids.Simple_Graph_Theory
 -- So we want to identfy (u,v) and (v,u) to be the same, so I will attempt to create a quotient map.
 
 namespace SimpGraph
-
+-- Retrieve the variables used in Simple_Graph_Theory.lean
 variable {V : Type*} (G : SimpGraph V)
 -- To define functions around these edges, it might be best to repurpose the definition to suit
--- our needs. This give us a term 'e' consisting of the pair (u,v) (given by e.1) and a proof
+-- our needs. This give us a term (edge) 'e' consisting of the pair (u,v) (given by e.1) and a proof
 -- that adj u v (given by e.2)
-def DirEdge (G : SimpGraph V) : Type _ := {e: V × V // G.adj e.1 e.2}
-def V_to_Sym2 (G : SimpGraph V) : G.DirEdge → Sym2 V := fun e => Sym2.mk e.1
-def UndirEdge (G : SimpGraph V) : Set (Sym2 V) := Set.range (G.V_to_Sym2)
+def DirEdge : Type _ := {e: V × V // G.adj e.1 e.2}
+-- Though conceptually the same as DirEdgeset, I expect this to be easier for working with functions
+-- especially considering it encodes a pair (a vertices pair and their proof of adjacency)
+def V_to_Sym2 : G.DirEdge → Sym2 V := fun e => Sym2.mk e.1
+def UndirEdge : Set (Sym2 V) := Set.range (G.V_to_Sym2)
 
 -- We need to determine that the set of undirected edges is finite in order to count them.
 --Since we know that V is finite, we know that V × V will be finite
@@ -22,7 +24,7 @@ def UndirEdge (G : SimpGraph V) : Set (Sym2 V) := Set.range (G.V_to_Sym2)
 -- We us noncomputable as it will need a classical reasoning. We also use 'instance' so that,
 -- given a finite vertex type V, we can treat G.DirEdge as a finite type as well
 noncomputable
-instance (G : SimpGraph V) [Fintype V] : Fintype (G.DirEdge) := by
+instance [Fintype V] : Fintype (G.DirEdge) := by
   classical
  -- Prove G.DirEdge has finitely many elements
   have : Finite (G.DirEdge) := by
@@ -38,7 +40,7 @@ instance (G : SimpGraph V) [Fintype V] : Fintype (G.DirEdge) := by
 -- We now want to prove that the set of undirected edges is finite. We can use that the range
 -- of any function from a finite domain must be finite, a lemma given by Set.finite_range
 noncomputable
-instance [Fintype V] (G : SimpGraph V) : Fintype (↑(G.UndirEdge)) := by
+instance [Fintype V] : Fintype (↑(G.UndirEdge)) := by
   classical
   exact (Set.finite_range (G.V_to_Sym2)).fintype
 
@@ -83,41 +85,53 @@ lemma sym2_classify {u1 v1 u2 v2 : V} (h : Sym2.mk (u1, v1) = Sym2.mk (u2, v2)) 
 -- |DirEdge| = 2 * |UndirEdge|.
 
 noncomputable
-def UndirEdgeNum [Fintype V] (G : SimpGraph V) [DecidableRel G.adj] : ℕ :=
+def UndirEdgeNum [Fintype V] [DecidableRel G.adj] : ℕ :=
 Finset.card (G.UndirEdge.toFinset)
 
 -- We want that the pre-image of an undirected edge 'a' under the map V_to_Sym2 has size 2 for any
 -- choice of undirected edge 'a'. We need to define this pre-image first.
 -- Recall that we defined DirEdge to be a pair of data, namely a pair of ordered vertices, and a
 -- proof that u and v are adjacent via adj u v.
-def pre_image [Fintype V] (G : SimpGraph V) (x : ↑(G.UndirEdge)) : Type _ :=
+def pre_image [Fintype V] (x : ↑(G.UndirEdge)) : Type _ :=
 {e : G.DirEdge // G.V_to_Sym2 e = x}
 
--- So the pre-image shoul, for h : G.adj u v consist of
+-- So the pre-image should, for h : G.adj u v, consist of
   -- ⟨(u, v), h⟩
   -- ⟨(v, u), G.symm h⟩
 -- distinct via adj_neq
+-- So the enxt thing to do is to prove that pre_image is finite.
+
+noncomputable
+instance [Fintype V] (x : ↑(G.UndirEdge)) : Fintype (G.pre_image x) := by
+  classical
+  -- As we previously did, probably easier to show finiteness by injecting into G.DirEdge
+  have : Finite (G.pre_image x) := by
+    refine Finite.of_injective (fun y : G.pre_image x => y.1) ?_
+    intro a b hab
+    apply Subtype.ext
+    simpa using hab
+  exact Fintype.ofFinite (G.pre_image x)
 
 -- The following definition will take a pair of vertices u v and a proof of adjacency to construct
 -- the directed edge (u, v)
-def DirEdgeBuild {u v : V} (G : SimpGraph V) (h : G.adj u v) : G.DirEdge := ⟨(u, v), h⟩
+def DirEdgeBuild {u v : V} (h : G.adj u v) : G.DirEdge := ⟨(u, v), h⟩
 -- Now this gives us, given a pair of vertices and an adjacency proof h : G.adj u v, the following:
   -- ⟨(u, v), h⟩ via DirEdgeBuild G h
-  -- ⟨(v, u), via DirEdgeBuild G (G.symm h)
+  -- ⟨(v, u) G.symm h⟩, via DirEdgeBuild G (G.symm h)
 -- We will rename these so that they are more intuitive to work with
-def e1 {u v : V} (G : SimpGraph V) (h : G.adj u v) : G.DirEdge := DirEdgeBuild G h
-def e2 {u v : V} (G : SimpGraph V) (h : G.adj u v) : G.DirEdge := DirEdgeBuild G (G.symm h)
+def e1 {u v : V} (h : G.adj u v) : G.DirEdge := DirEdgeBuild G h
+def e2 {u v : V} (h : G.adj u v) : G.DirEdge := DirEdgeBuild G (G.symm h)
 
 -- Our aim now is to prove that {u, v} has exactly the two elements e1 and e2 stated above. We can
 -- characterise {u, v} by its members (u, v) & (v, u)
-lemma characterise_members (G : SimpGraph V) {u v : V} (h : G.adj u v) (e : G.DirEdge) :
+lemma characterise_members {u v : V} (e : G.DirEdge) :
 G.V_to_Sym2 e = Sym2.mk (u, v) ↔ e.1 = (u, v) ∨ e.1 = (v, u) := by
 constructor -- Break into the forward and backward directions
 · intro heq1
-  have ha : (e.1.1 = u ∧ e.1.2 = v) ∨ (e.1.1 = v ∧ e.1.2 = u)
-  have : Sym2.mk e.1 = Sym2.mk (u, v) := by
-    simpa [V_to_Sym2] using heq1
-  exact (sym2_classify (u1 := e.1.1) (v1 := e.1.2) (u2 := u) (v2 := v) this)
+  have ha : (e.1.1 = u ∧ e.1.2 = v) ∨ (e.1.1 = v ∧ e.1.2 = u) := by
+    have : Sym2.mk e.1 = Sym2.mk (u, v) := by
+      simpa [V_to_Sym2] using heq1
+    exact (sym2_classify (u1 := e.1.1) (v1 := e.1.2) (u2 := u) (v2 := v) this)
 
   cases ha with
   | inl huv =>
@@ -125,16 +139,15 @@ constructor -- Break into the forward and backward directions
     rcases huv with ⟨hu, hv⟩
     ext <;> simp [hu, hv]
   | inr hvu =>
-     right
-     rcases hvu with ⟨hu, hv⟩
-     ext <;> simp [hu, hv]
+    right
+    rcases hvu with ⟨hu, hv⟩
+    ext <;> simp [hu, hv]
 · intro heq2
   cases heq2 with
   | inl hpair =>
-      simp [V_to_Sym2, hpair]
+    rw [V_to_Sym2, hpair]
   | inr hpair =>
-  sorry
-sorry
-
+    rw [V_to_Sym2, hpair]
+    exact (sym2_comm (u := u) (v := v)).symm
 
 end SimpGraph
