@@ -29,8 +29,8 @@ theorem platonic_inequality
 -----------
 
 -- Define new hypotheses: m, n, and E are not 0
-have hm' : m ≠ 0 := by linarith [hm] --want to make this more low level
-have hn' : n ≠ 0 := by linarith [hn] -- also make into seperate lemma for reuse
+have hm' : m ≠ 0 := by linarith [hm]
+have hn' : n ≠ 0 := by linarith [hn]
 have hE' : E ≠ 0 := by linarith [hE]
 
 -- Define new hypotheses: Rearrange hFaces and hVerts by dividing both sides by m or n respectively

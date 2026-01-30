@@ -220,6 +220,34 @@ theorem SimpGraph.DirHandshake {V : Type*} [Fintype V] (G : SimpGraph V)
   simp [hunioneq]
 
 
+
+-- Added by Tyler:
+-- For the inequality derivation, we need to use Euler's Characteristic Formula V + E - F = 2.
+-- This would be too difficult for us to prove, as we would need some notion of planarity and
+-- connectedness, which is definitely out of the scope of this project.
+-- Instead, we will just create a new structure, PlanarConnectedGraph that extends SimpGraph that
+-- just assumes planarity and connectedness.
+-- Using this, we will just define F = V + E - 2 for a PlanarConnectedGraph, which is technically
+-- true by Euler's Characteristic Formula, but we have not proved this - just stated it.
+
+structure PlatonicGraph (V : Type*) [Fintype V] extends SimpGraph V where
+  (n : ℕ)
+  (isRegular : ∀ v : V, FinSimpGraph.Deg toSimpGraph v = n)
+  (isPlanar : True)
+  (isConnected: True)
+
+
+noncomputable
+def PlatonicGraph.NoFaces {V : Type*} [Fintype V] (pG : PlatonicGraph V) :
+  ℕ := 2 - FinSimpGraph.Degsum pG.toSimpGraph + SimpGraph.DirNoEdges pG.toSimpGraph
+
+-- change this to UndirNoEdges when formalised
+noncomputable
+def PlatonicGraph.EdgesPerFace {V : Type*} [Fintype V] (pG : PlatonicGraph V) :
+  ℕ := (SimpGraph.DirNoEdges pG.toSimpGraph / 2) / PlatonicGraph.NoFaces pG
+
+
+
 -- Here is my first attempt at proving the lemma using induction.
 -- I only managed the base case and I have since changed a few definitions
 -- so it probably won't run anymore, but I spent so long on it that I want
