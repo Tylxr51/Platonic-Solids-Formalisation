@@ -1,5 +1,12 @@
 # Commit Log
 
+#### 30.01.26
+
+- Defined regularity and connectedness
+- Created RegularGraph, ConnectedGraph, and PlanarGraph structures (with planar as an assumed property of a planar graph)
+- Defined a face as Type* so it can be used in Eulers Characteristic Formula but doesn't need a concrete definition of what it actually is
+- Created a PlatonicGraph structure
+
 #### 25.01.26
 
 - Added definitions and basic lemmas over the last few days for unordered graphs to try prove the handshake lemma using set-up from the simple graph theory file

@@ -222,29 +222,99 @@ theorem SimpGraph.DirHandshake {V : Type*} [Fintype V] (G : SimpGraph V)
 
 
 -- Added by Tyler:
--- For the inequality derivation, we need to use Euler's Characteristic Formula V + E - F = 2.
--- This would be too difficult for us to prove, as we would need some notion of planarity and
--- connectedness, which is definitely out of the scope of this project.
--- Instead, we will just create a new structure, PlanarConnectedGraph that extends SimpGraph that
--- just assumes planarity and connectedness.
--- Using this, we will just define F = V + E - 2 for a PlanarConnectedGraph, which is technically
--- true by Euler's Characteristic Formula, but we have not proved this - just stated it.
+-- For the following definitions, I will no longer use V to refer to the set of
+-- vertices as in Euler's Characteristic Formula, V is the size of the set of vertices
+-- I will refer to the set of vertices as VertSet and the size of VertSet as VCard
 
-structure PlatonicGraph (V : Type*) [Fintype V] extends SimpGraph V where
-  (n : ℕ)
-  (isRegular : ∀ v : V, FinSimpGraph.Deg toSimpGraph v = n)
-  (isPlanar : True)
-  (isConnected: True)
+-- Define a Finite Graph which is just a Simple Graph where V is finite
+structure FinGraph where
+  VertSet : Type*
+  instV : Fintype VertSet
+  G : SimpGraph VertSet
+
+-- make an instance of instV
+attribute [instance] FinGraph.instV
 
 
-noncomputable
-def PlatonicGraph.NoFaces {V : Type*} [Fintype V] (pG : PlatonicGraph V) :
-  ℕ := 2 - FinSimpGraph.Degsum pG.toSimpGraph + SimpGraph.DirNoEdges pG.toSimpGraph
 
--- change this to UndirNoEdges when formalised
-noncomputable
-def PlatonicGraph.EdgesPerFace {V : Type*} [Fintype V] (pG : PlatonicGraph V) :
-  ℕ := (SimpGraph.DirNoEdges pG.toSimpGraph / 2) / PlatonicGraph.NoFaces pG
+def FinSimpGraph.Regular (X : FinGraph) : Prop :=
+  ∃ n, ∀ v : X.VertSet, FinSimpGraph.Deg X.G v = n
+
+-- Define two points as reachable if there are adjacency relations connecting them
+def SimpGraph.Reachable {VertSet : Type*} (G : SimpGraph VertSet) (u v : VertSet) : Prop :=
+  Relation.ReflTransGen G.adj u v
+
+-- Define connectedness for a simple graph using reachability definition
+def SimpGraph.Connected {VertSet : Type*} (G : SimpGraph VertSet) : Prop :=
+  ∀ u v : VertSet, SimpGraph.Reachable G u v
+
+
+
+
+
+-- Define a Regular Graph as a Finite Graph with Regularity
+structure RegularGraph (X : FinGraph) where
+  n : ℕ
+  isRegular : FinSimpGraph.Regular X
+
+-- Define Connected Graph as Simple Graph that is Connected
+structure ConnectedGraph {VertSet : Type*} (G : SimpGraph VertSet) where
+  isConnected : SimpGraph.Connected G
+
+-- Define Planar Graph as Finite Graph that is Planar (not defined), has Faces, and
+-- has V - E + F = 2. We do not define planarity as it is out of the scope of this project,
+-- so we simply state is as a property
+structure PlanarGraph (X : FinGraph) where
+  isPlanar : Prop := True
+
+  Face : Type*
+  instFace : Fintype Face
+
+  FCard : ℕ := Fintype.card Face
+
+  m : ℕ
+
+  FaceDeg : Face → ℕ
+  uniformFaces : ∀ f : Face, FaceDeg f = m
+
+  EDir : ℕ := SimpGraph.DirNoEdges X.G
+  ECard : ℕ := EDir / 2
+
+  VCard : ℕ := Fintype.card X.VertSet
+
+  hEuler : (VCard : ℤ) - (ECard : ℤ) + (FCard : ℤ) = 2
+
+attribute [instance] PlanarGraph.instFace
+
+
+structure PlatonicGraph where
+  X : FinGraph
+  regular : RegularGraph X
+  connected : ConnectedGraph X.G
+  planar : PlanarGraph X
+  hFaces : planar.m * planar.FCard = 2 * planar.ECard
+
+
+
+-- theorem platonic_inequality
+
+--   {VertSet : Type*} [Fintype VertSet]
+
+--   (pG : PlatonicGraph VertSet)
+
+--   (hm : (PlatonicGraph.EdgesPerFace pG : ℝ) > 2)
+--   (hn : (pG.n : ℝ) > 2)
+--   (hEpos : (SimpGraph.DirNoEdges pG.toSimpGraph : ℝ) > 0)
+--   (hEuler : (Fintype.card (Finset.univ : Finset VertSet) : ℝ)
+--     - (SimpGraph.DirNoEdges pG.toSimpGraph : ℝ) + (PlatonicGraph.NoFaces pG : ℝ) = 2)
+--   (hFaces : (PlatonicGraph.EdgesPerFace pG : ℝ) * (PlatonicGraph.NoFaces pG : ℝ)
+--     = 2 * (SimpGraph.DirNoEdges pG.toSimpGraph : ℝ))
+--   (hVerts : (pG.n : ℝ) * (Fintype.card (Finset.univ : Finset VertSet) : ℝ)
+--     = 2 * (SimpGraph.DirNoEdges pG.toSimpGraph : ℝ)) :
+
+--   ((PlatonicGraph.EdgesPerFace pG : ℝ) - 2) * ((pG.n : ℝ) - 2) < 4 := by
+
+--   ------------------------------------------------------------------------------
 
 
 

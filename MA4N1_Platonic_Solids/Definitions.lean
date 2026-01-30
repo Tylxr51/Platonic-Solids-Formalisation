@@ -1,7 +1,7 @@
 import Mathlib.Tactic
+import MA4N1_Platonic_Solids.Simple_Graph_Theory
 
-
-
+-- Added by Sean
 def PlatonicSolids : Set (ℕ × ℕ × ℕ × ℕ × ℕ) :=
   { p |
     let V := p.1
