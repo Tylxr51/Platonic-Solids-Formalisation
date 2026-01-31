@@ -1,5 +1,7 @@
 # Commit Log
 
+#### 31.01.26
+- Added a couple of connecting definitions of lemmas to finish the proof that |DirEdges| = 2 * |UndirEdges|
 #### 25.01.26
 
 - Added definitions and basic lemmas over the last few days for unordered graphs to try prove the handshake lemma using set-up from the simple graph theory file
