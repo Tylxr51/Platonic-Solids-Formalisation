@@ -83,7 +83,7 @@ lemma sym2_classify {u1 v1 u2 v2 : V} (h : Sym2.mk (u1, v1) = Sym2.mk (u2, v2)) 
 -- edges {u, v}, and show this map is 2-to-1. That is, every {u, v} with adj u v has two distinct
 -- direct representatives (u, v) or (v, u). We then use this to conclude that
 -- |DirEdge| = 2 * |UndirEdge|.
-
+--
 noncomputable
 def UndirEdgeNum [Fintype V] [DecidableRel G.adj] : ℕ :=
 Finset.card (G.UndirEdge.toFinset)
