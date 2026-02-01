@@ -356,4 +356,44 @@ Fintype.card (G.DirEdge) = 2 * Fintype.card (↑(G.UndirEdge)) := by
       simp
       rw [mul_comm]
 
+-- We have almost everything we need now, but we first need to connect what is in this file to
+-- Sean's Simple_Graph_Theory file. To do this, we need to show that 'DirNoEdges = |DirEdges|',
+-- bridging the two deifnitions, and then that 'UndirEdgeNum = |UndirEdge|'
+-- To do so, we will use a similar ideas as we did previously, write a 'def' using an equivalence.
+
+noncomputable
+def DirEdge_equiv_DirEdgeset [Fintype V] : G.DirEdge ≃ ↑(G.DirEdgeset) :=  by
+  classical
+  refine
+  { toFun := fun e => ⟨e.1, ?_⟩
+    invFun := fun e => ⟨e.1, ?_⟩
+    left_inv := by
+      intro e ; rfl
+    right_inv := by
+      intro e ; rfl }
+  · simp
+  · aesop
+
+lemma DirNoEdges_eq_card_DirEdge [Fintype V] [DecidableRel G.adj] :
+DirNoEdges G = Fintype.card (G.DirEdge) := by
+  classical
+  -- We first convert DirNoEdges into the cardinality of the subtype ↑(G.DirEdgeset)
+  have h1 : G.DirNoEdges = Fintype.card (↑(G.DirEdgeset)) := by
+    simp [DirNoEdges]
+  have h2 : Fintype.card (↑(G.DirEdgeset)) = Fintype.card (G.DirEdge) := by
+    simpa using (Fintype.card_congr (G.DirEdge_equiv_DirEdgeset))
+  exact h1.trans h2
+
+-- We now have the undirected version of the statement, that UndirEdgeNum is the cardinality of the
+--  subtype ↑(G.UndirEdge)
+lemma UndirEdgeNum_eq_card_UndirEdge [Fintype V] [DecidableRel G.adj] :
+G.UndirEdgeNum = Fintype.card (↑(G.UndirEdge)) := by
+  classical
+  simp [UndirEdgeNum]
+
+-- We can finally put this all together and conclude the reuslt of the handshake lemma for
+-- undirected graphs. We will rewrite some of the results as hypotheses that we can insert here.
+theorem UndirHandshake [Fintype V] [DecidableRel G.adj] :
+FinSimpGraph.Degsum G = 2 * G.UndirEdgeNum := by
+
 end SimpGraph
