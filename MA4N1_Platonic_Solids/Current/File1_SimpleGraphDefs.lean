@@ -7,8 +7,8 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 
 
 
-structure SimpGraph (V : Type*) where
-    (adj : V → V → Prop)
+structure SimpGraph (VertSet : Type*) where
+    (adj : VertSet → VertSet → Prop)
     (symm : Symmetric adj)
     (loopless : Irreflexive adj)
 
@@ -23,14 +23,14 @@ attribute [instance] FinGraph.instVertSet
 
 
 -- Standard definition of the neighbourhood of a vertex
-def SimpGraph.Nbhd {V : Type*} (G : SimpGraph V) (v : V) : Set V :=
+def SimpGraph.Nbhd {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) : Set VertSet :=
   {u | G.adj v u}
 
 -- The adjacent edgeset of a vertex v is the set of directed edges from v.
 -- As with many of the following definitions, this should technically be
 -- unordered pairs but in this case it doesn't make much difference for us
-def SimpGraph.AdjEdgeset {V : Type*} (G : SimpGraph V) (v : V) : Set (V × V) :=
-  {(v',u) : V × V | v'=v ∧ u ∈ SimpGraph.Nbhd G v}
+def SimpGraph.AdjEdgeset {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) :
+    Set (VertSet × VertSet) := {(v',u) : VertSet × VertSet | v'=v ∧ u ∈ SimpGraph.Nbhd G v}
 
 -- Needed to show that if V is finite then so is any adjacent edgeset
 noncomputable

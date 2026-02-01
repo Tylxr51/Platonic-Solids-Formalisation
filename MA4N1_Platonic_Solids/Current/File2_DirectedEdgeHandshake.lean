@@ -3,13 +3,12 @@ import MA4N1_Platonic_Solids.Current.File1_SimpleGraphDefs
 -- simple graphs this should really be unordered pairs.
 -- Should be able to correct this with Sym2 but I was too far in by the time
 -- I noticed
-def SimpGraph.DirEdgeset {V : Type*} (G : SimpGraph V) :
-    Set (V × V) :=
-    { (u,v) | G.adj u v }
+def SimpGraph.DirEdgeset {VertSet : Type*} (G : SimpGraph VertSet) :
+    Set (VertSet × VertSet) := { (u,v) | G.adj u v }
 
 -- Our first lemma, showing that the union of all the adjacent edgesets of
 -- each vertex is the edgeset of the graph #noway
-lemma SimpGraph.EdgesetEqUnionAdjEdge {V : Type*} (G : SimpGraph V) :
+lemma SimpGraph.EdgesetEqUnionAdjEdge {VertSet : Type*} (G : SimpGraph VertSet) :
 (⋃ v, SimpGraph.AdjEdgeset G v) = SimpGraph.DirEdgeset G :=  by
     ext
     apply Iff.intro
@@ -52,8 +51,8 @@ noncomputable
 def FinGraph.DirNoEdges (X : FinGraph) : ℕ :=
     Finset.card (SimpGraph.DirEdgeset X.G).toFinset
 
-lemma SimpGraph.DirEdgesetDisjoint {V : Type*} (G : SimpGraph V) :
-∀ ⦃v u : V⦄, v ≠ u → Disjoint (G.AdjEdgeset v) (G.AdjEdgeset u) := by
+lemma SimpGraph.DirEdgesetDisjoint {VertSet : Type*} (G : SimpGraph VertSet) :
+∀ ⦃v u : VertSet⦄, v ≠ u → Disjoint (G.AdjEdgeset v) (G.AdjEdgeset u) := by
     intro u v hneq
     rw[Disjoint]
     simp
@@ -62,7 +61,7 @@ lemma SimpGraph.DirEdgesetDisjoint {V : Type*} (G : SimpGraph V) :
     simp
     by_contra
     rename_i y h4
-    have h5 : y ∈ {(v',u) : V × V | v'=v ∧ u ∈ SimpGraph.Nbhd G v} := by
+    have h5 : y ∈ {(v',u) : VertSet × VertSet | v'=v ∧ u ∈ SimpGraph.Nbhd G v} := by
         apply h2
         exact h4
     have hy : y.1 = v ∧ y.2 ∈ G.Nbhd v := by
@@ -70,7 +69,7 @@ lemma SimpGraph.DirEdgesetDisjoint {V : Type*} (G : SimpGraph V) :
     have h6 : y.1 = v := by
         exact hy.1
 
-    have h7 : y ∈ {(v',w) : V × V | v'=u ∧ w ∈ SimpGraph.Nbhd G u} := by
+    have h7 : y ∈ {(v',w) : VertSet × VertSet | v'=u ∧ w ∈ SimpGraph.Nbhd G u} := by
         apply h1
         exact h4
     have hy' : y.1 = u ∧ y.2 ∈ G.Nbhd u := by
@@ -117,29 +116,30 @@ lemma FinGraph.DirEdgeFinsetDisjoint (X : FinGraph) :
     contradiction
 
 -- Finally, here is our directed version of the handshaking lemma
-theorem FinGraph.DirHandshake (X : FinGraph) : FinGraph.DirNoEdges X = FinGraph.Degsum X := by
-  classical
-  rw[DirNoEdges]
-  rw[FinGraph.Degsum]
-  simp [FinGraph.Deg]
-  have hdis : ∀ ⦃v u : X.VertSet⦄, v ≠ u → Disjoint (X.AdjEdgeFinset v) (X.AdjEdgeFinset u) := by
-    exact FinGraph.DirEdgeFinsetDisjoint X
-  have hpdis :
-  (↑(Finset.univ : Finset X.VertSet) : Set X.VertSet).PairwiseDisjoint X.AdjEdgeFinset := by
-    intro u hu v hv hne
-    exact hdis hne
-  have hsumunion  : Finset.card (Finset.biUnion Finset.univ (X.AdjEdgeFinset))
-  = ∑ x, Finset.card (X.AdjEdgeFinset x)  := by
-    simpa using
-      (Finset.card_biUnion
-        (s := (Finset.univ : Finset X.VertSet))
-        (t := X.AdjEdgeFinset)
-        (hpdis))
-  rw[← hsumunion]
-  have hunioneq : Finset.univ.biUnion X.AdjEdgeFinset = X.G.DirEdgeset.toFinset := by
-    apply Finset.ext
-    intro a
-    simp only [Finset.mem_biUnion, Finset.mem_univ, true_and, Set.mem_toFinset]
-    simp [AdjEdgeFinset]
-    simp [← SimpGraph.EdgesetEqUnionAdjEdge]
-  simp [hunioneq]
+theorem FinGraph.DirHandshake (X : FinGraph) :
+    FinGraph.DirNoEdges X = FinGraph.Degsum X := by
+    classical
+    rw[DirNoEdges]
+    rw[FinGraph.Degsum]
+    simp [FinGraph.Deg]
+    have hdis : ∀ ⦃v u : X.VertSet⦄, v ≠ u → Disjoint (X.AdjEdgeFinset v) (X.AdjEdgeFinset u) := by
+        exact FinGraph.DirEdgeFinsetDisjoint X
+    have hpdis :
+    (↑(Finset.univ : Finset X.VertSet) : Set X.VertSet).PairwiseDisjoint X.AdjEdgeFinset := by
+        intro u hu v hv hne
+        exact hdis hne
+    have hsumunion  : Finset.card (Finset.biUnion Finset.univ (X.AdjEdgeFinset))
+    = ∑ x, Finset.card (X.AdjEdgeFinset x)  := by
+        simpa using
+        (Finset.card_biUnion
+            (s := (Finset.univ : Finset X.VertSet))
+            (t := X.AdjEdgeFinset)
+            (hpdis))
+    rw[← hsumunion]
+    have hunioneq : Finset.univ.biUnion X.AdjEdgeFinset = X.G.DirEdgeset.toFinset := by
+        apply Finset.ext
+        intro a
+        simp only [Finset.mem_biUnion, Finset.mem_univ, true_and, Set.mem_toFinset]
+        simp [AdjEdgeFinset]
+        simp [← SimpGraph.EdgesetEqUnionAdjEdge]
+    simp [hunioneq]
