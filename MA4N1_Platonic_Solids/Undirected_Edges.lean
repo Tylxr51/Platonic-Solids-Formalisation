@@ -396,4 +396,17 @@ G.UndirEdgeNum = Fintype.card (↑(G.UndirEdge)) := by
 theorem UndirHandshake [Fintype V] [DecidableRel G.adj] :
 FinSimpGraph.Degsum G = 2 * G.UndirEdgeNum := by
 
+ have hdirhand : G.DirNoEdges = FinSimpGraph.Degsum G := G.DirHandshake
+ have hdircard : G.DirNoEdges = Fintype.card (G.DirEdge) := G.DirNoEdges_eq_card_DirEdge
+ have htwo : Fintype.card (G.DirEdge) = 2 * Fintype.card (↑(G.UndirEdge)) :=
+ G.card_DirEdge_eq_two_card_UndirEdge
+ have hundir : G.UndirEdgeNum = Fintype.card (↑(G.UndirEdge)) := G.UndirEdgeNum_eq_card_UndirEdge
+ calc
+  FinSimpGraph.Degsum G = G.DirNoEdges := by
+    simp [hdirhand]
+  _ = Fintype.card (G.DirEdge) := hdircard
+  _ = 2 * Fintype.card (↑(G.UndirEdge)) := htwo
+  _ = 2 * G.UndirEdgeNum := by
+    simp [hundir]
+
 end SimpGraph
