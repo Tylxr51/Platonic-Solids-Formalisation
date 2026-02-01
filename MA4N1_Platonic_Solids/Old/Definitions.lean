@@ -1,5 +1,5 @@
 import Mathlib.Tactic
-import MA4N1_Platonic_Solids.Simple_Graph_Theory
+import MA4N1_Platonic_Solids.Old.Simple_Graph_Theory
 
 -- Added by Sean
 def PlatonicSolids : Set (ℕ × ℕ × ℕ × ℕ × ℕ) :=

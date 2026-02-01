@@ -1,7 +1,7 @@
 import Mathlib.Tactic
 import Mathlib.Data.Real.Basic
-import MA4N1_Platonic_Solids.Inequality_Derivation_Lemmas
-import MA4N1_Platonic_Solids.Simple_Graph_Theory
+import MA4N1_Platonic_Solids.Old.Inequality_Derivation_Lemmas
+import MA4N1_Platonic_Solids.Old.Simple_Graph_Theory
 open Inequality_Derivation_Lemmas
 
 
