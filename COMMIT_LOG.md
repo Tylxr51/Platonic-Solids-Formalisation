@@ -1,5 +1,10 @@
 # Commit Log
 
+
+#### 31.01.26
+
+- Added a couple of connecting definitions of lemmas to finish the proof that |DirEdges| = 2 * |UndirEdges|
+
 #### 30.01.26
 
 - Defined regularity and connectedness
