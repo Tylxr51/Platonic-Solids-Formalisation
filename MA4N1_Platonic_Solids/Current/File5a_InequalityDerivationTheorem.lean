@@ -44,7 +44,6 @@ theorem platonic_inequality
   have hVertsR : (Pt.regular.n : ℝ) * (Pt.X.VCard : ℝ) = 2 * (Pt.X.ECard : ℝ) := by
     exact_mod_cast Pt.hVerts
 
-  -- after your `let m : ℝ := (Pt.m : ℝ)` etc
   have hFaces : m * F = 2 * E := by
     simpa [m, F, E] using hFacesR
 
@@ -53,8 +52,7 @@ theorem platonic_inequality
 
 
 
-  have hEulerZ : (VN : ℤ) - (EN : ℤ) + (FN : ℤ) = 2 :=
-    PlanarGraph.hEuler Pt.X Pt.planar
+  have hEulerZ : (VN : ℤ) - (EN : ℤ) + (FN : ℤ) = 2 := PlanarGraph.hEuler Pt.X Pt.planar
 
   have hEuler : V - E + F = 2 := by
     have := congrArg (fun z : ℤ => (z : ℝ)) hEulerZ

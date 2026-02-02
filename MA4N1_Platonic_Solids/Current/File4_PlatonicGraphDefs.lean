@@ -76,9 +76,6 @@ structure PlatonicGraph where
     hFaceHandshake : planar.FaceDegSum = 2 * X.ECard
 
 
-    -- hFaces : m * planar.FCard = 2 * planar.ECard
-
-
 theorem PlatonicGraph.hVerts (Pt : PlatonicGraph) :
     Pt.regular.n * Pt.X.VCard = 2 * Pt.X.ECard := by
         simp [FinGraph.ECard]
