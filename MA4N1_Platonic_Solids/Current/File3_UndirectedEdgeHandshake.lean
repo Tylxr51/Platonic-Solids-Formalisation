@@ -1,6 +1,7 @@
 import Mathlib.Data.Sym.Sym2
 import Mathlib.Tactic.FinCases
 import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Tactic.Ring
 import MA4N1_Platonic_Solids.Current.File1_SimpleGraphDefs
 import MA4N1_Platonic_Solids.Current.File2_DirectedEdgeHandshake
 
@@ -336,45 +337,32 @@ def pre_image_equiv (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
 -- We now introduce the lemma that the number of directed edges is twice the number of
 -- undirected edges
 theorem card_DirEdge_eq_two_card_UndirEdge (X : FinGraph) :
-Fintype.card (DirEdge X.G) = 2 * Fintype.card (↑(UndirEdge X.G)) := by
-    classical
-    let f : DirEdge X.G → ↑(UndirEdge X.G) := to_Undir X
-    have hfin : Fintype (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) := Fintype.ofEquiv (DirEdge X.G) (Equiv.sigmaFiberEquiv f).symm
-    -- We will need to introduce sigma for counting. We count all of the pre-images by summing
-    -- {e : G.DirEdge // f e = x} over all x : UndirEdge. This takes the disjoint union and then
-    -- counts/sums them.
-    -- We use Equiv.sigmaFiberEquiv is an equivalence between the domain and the disjoint union of the
-    -- 'fibers' (I have used 'pre-image' throughout). This is why we count the pre-images, as
-    -- Equiv.sigmaFiberEquiv will conclude this is the same as counting the number of directed edges.
-    have hσ : Fintype.card (DirEdge X.G) =
-    Fintype.card (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) := by
-        simpa using (Fintype.card_congr (Equiv.sigmaFiberEquiv f)).symm
-    have hsum : Fintype.card (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) =
-    ∑ ue : ↑(UndirEdge X.G), Fintype.card {de : DirEdge X.G // f de = ue} := by
-        rw [← Fintype.card_sigma]
-        exact
+    Fintype.card (DirEdge X.G) = 2 * Fintype.card (↑(UndirEdge X.G)) := by
+  classical
+  let f : DirEdge X.G → ↑(UndirEdge X.G) := to_Undir X
 
-
-  -- We can now use a 'calc' to chain the equalities together
-    calc
-        Fintype.card (DirEdge X.G) = ∑ ue : ↑(UndirEdge X.G), Fintype.card {de : DirEdge X.G // f de = ue} := by
-            simp [hσ]
-        -- Use the pre_image_equiv lemma to instead consider pre-images I defined earlier instead of
-        -- these 'fibers'. We can then use pre_image_cardinality_eq_2 whichs tated each pre-image had
-        -- cardinality 2
-        _ = ∑ x : ↑(G.UndirEdge), Fintype.card (G.pre_image x) := by
-        refine Finset.sum_congr rfl ?_
-        intro x hx
-        simpa [f] using (Fintype.card_congr (G.pre_image_equiv (x := x))).symm
-        -- For each x, we sum over 2 (i.e. each x adds 2 to the sum). We can then show this is
-        -- equivalent to simply multiplying the number of undirected edges by 2
-        _ = ∑ x : ↑(G.UndirEdge), 2 := by
-        refine Finset.sum_congr rfl ?_
-        intro x hx
-        simpa using (G.pre_image_card_eq_2 (x := x))
-        _ = 2 * Fintype.card (↑(G.UndirEdge)) := by
-        simp
-        rw [mul_comm]
+  calc
+    Fintype.card (DirEdge X.G)
+        = Fintype.card (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) := by
+          -- domain ≃ disjoint union of fibers
+          simpa using (Fintype.card_congr (Equiv.sigmaFiberEquiv f)).symm
+    _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card {de : DirEdge X.G // f de = ue} := by
+          -- card of sigma = sum of cards
+          simp
+    _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card (pre_image X ue) := by
+          -- replace fibers with your `pre_image` via the equivalence
+          refine Finset.sum_congr rfl ?_
+          intro ue _
+          simpa [f] using (Fintype.card_congr (pre_image_equiv X (ue := ue))).symm
+    _ = ∑ _ue : ↑(UndirEdge X.G), 2 := by
+          -- each preimage has card 2
+          refine Finset.sum_congr rfl ?_
+          intro ue _
+          simpa using (pre_image_card_eq_2 X (ue := ue))
+    _ = 2 * Fintype.card (↑(UndirEdge X.G)) := by
+          -- sum of constant = constant * number of terms
+          simp [Finset.card_univ]
+          ring
 
 -- We have almost everything we need now, but we first need to connect what is in this file to
 -- Sean's Simple_Graph_Theory file. To do this, we need to show that 'DirNoEdges = |DirEdges|',
