@@ -39,6 +39,11 @@ attribute [instance] PlanarGraph.instFace
 def PlanarGraph.FCard {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
     Fintype.card Pl.Face
 
+noncomputable
+def PlanarGraph.FaceDegSum {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
+    ∑ f : Pl.Face, Pl.FaceDeg f
+
+
 theorem PlanarGraph.hEuler (X : FinGraph) (Pl : PlanarGraph X) :
     (X.VCard : ℤ) - (X.ECard : ℤ) + (Pl.FCard : ℤ) = 2 := by
         sorry
@@ -68,6 +73,9 @@ structure PlatonicGraph where
     m : ℕ
     uniformFaces : ∀ f : planar.Face, planar.FaceDeg f = m
 
+    hFaceHandshake : planar.FaceDegSum = 2 * X.ECard
+
+
     -- hFaces : m * planar.FCard = 2 * planar.ECard
 
 
@@ -75,3 +83,30 @@ theorem PlatonicGraph.hVerts (Pt : PlatonicGraph) :
     Pt.regular.n * Pt.X.VCard = 2 * Pt.X.ECard := by
         simp [FinGraph.ECard]
         simpa using (nV_UndirHandshake Pt.X Pt.regular)
+
+
+
+theorem PlatonicGraph.hFaces (Pt : PlatonicGraph) :
+    Pt.m * Pt.planar.FCard = 2 * Pt.X.ECard := by
+    classical
+
+    -- Expand FaceDegSum
+    have h1 : Pt.planar.FaceDegSum = ∑ f : Pt.planar.Face, Pt.m := by
+        -- use uniformFaces to rewrite each FaceDeg f as m
+        simp [PlanarGraph.FaceDegSum, Pt.uniformFaces]
+
+    -- Turn sum of constant into m * number of faces
+    have h2 : (∑ f : Pt.planar.Face, Pt.m) = Pt.m * Pt.planar.FCard := by
+        simp [PlanarGraph.FCard]
+        apply mul_comm
+
+    -- Now combine with the handshake assumption
+    calc
+        Pt.m * Pt.planar.FCard = ∑ f : Pt.planar.Face, Pt.m := by
+            symm
+            exact h2
+        _ = Pt.planar.FaceDegSum := by
+            symm
+            exact h1
+        _ = 2 * Pt.X.ECard := by
+            exact Pt.hFaceHandshake
