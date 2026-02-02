@@ -15,12 +15,13 @@ structure SimpGraph (VertSet : Type*) where
 structure FinGraph where
     VertSet : Type*
     instVertSet : Fintype VertSet
-    G : SimpGraph VertSet
 
+    G : SimpGraph VertSet
+    instAdj : DecidableRel G.adj
 
 -- make an instance of instV
 attribute [instance] FinGraph.instVertSet
-
+attribute [instance] FinGraph.instAdj
 
 -- Standard definition of the neighbourhood of a vertex
 def SimpGraph.Nbhd {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) : Set VertSet :=
