@@ -370,7 +370,7 @@ theorem card_DirEdge_eq_two_card_UndirEdge (X : FinGraph) :
 -- To do so, we will use a similar ideas as we did previously, write a 'def' using an equivalence.
 
 noncomputable
-def DirEdge_equiv_DirEdgeset [Fintype V] : G.DirEdge ≃ ↑(G.DirEdgeset) :=  by
+def DirEdge_equiv_DirEdgeset (X : FinGraph) : DirEdge X.G ≃ ↑(SimpGraph.DirEdgeset X.G) :=  by
   classical
   refine
   { toFun := fun e => ⟨e.1, ?_⟩
@@ -382,37 +382,37 @@ def DirEdge_equiv_DirEdgeset [Fintype V] : G.DirEdge ≃ ↑(G.DirEdgeset) :=  b
   · simp
   · aesop
 
-lemma DirNoEdges_eq_card_DirEdge [Fintype V] [DecidableRel G.adj] :
-DirNoEdges G = Fintype.card (G.DirEdge) := by
+lemma DirNoEdges_eq_card_DirEdge (X : FinGraph) [DecidableRel X.G.adj] :
+FinGraph.DirNoEdges X = Fintype.card (DirEdge X.G) := by
   classical
   -- We first convert DirNoEdges into the cardinality of the subtype ↑(G.DirEdgeset)
-  have h1 : G.DirNoEdges = Fintype.card (↑(G.DirEdgeset)) := by
-    simp [DirNoEdges]
-  have h2 : Fintype.card (↑(G.DirEdgeset)) = Fintype.card (G.DirEdge) := by
-    simpa using (Fintype.card_congr (G.DirEdge_equiv_DirEdgeset))
+  have h1 : FinGraph.DirNoEdges X = Fintype.card (↑(SimpGraph.DirEdgeset X.G)) := by
+    simp [FinGraph.DirNoEdges]
+  have h2 : Fintype.card (↑(SimpGraph.DirEdgeset X.G)) = Fintype.card (DirEdge X.G) := by
+    simpa using (Fintype.card_congr (DirEdge_equiv_DirEdgeset X))
   exact h1.trans h2
 
 -- We now have the undirected version of the statement, that UndirEdgeNum is the cardinality of the
 --  subtype ↑(G.UndirEdge)
-lemma UndirEdgeNum_eq_card_UndirEdge [Fintype V] [DecidableRel G.adj] :
-G.UndirEdgeNum = Fintype.card (↑(G.UndirEdge)) := by
+lemma UndirEdgeNum_eq_card_UndirEdge (X : FinGraph) [DecidableRel X.G.adj] :
+UndirEdgeNum X = Fintype.card (↑(UndirEdge X.G)) := by
   classical
   simp [UndirEdgeNum]
 
 -- We can finally put this all together and conclude the reuslt of the handshake lemma for
 -- undirected graphs. We will rewrite some of the results as hypotheses that we can insert here.
-theorem UndirHandshake [Fintype V] [DecidableRel G.adj] :
-FinSimpGraph.Degsum G = 2 * G.UndirEdgeNum := by
+theorem UndirHandshake (X : FinGraph) [DecidableRel X.G.adj] :
+FinGraph.Degsum X = 2 * UndirEdgeNum X := by
 
- have hdirhand : G.DirNoEdges = FinSimpGraph.Degsum G := G.DirHandshake
- have hdircard : G.DirNoEdges = Fintype.card (G.DirEdge) := G.DirNoEdges_eq_card_DirEdge
- have htwo : Fintype.card (G.DirEdge) = 2 * Fintype.card (↑(G.UndirEdge)) :=
- G.card_DirEdge_eq_two_card_UndirEdge
- have hundir : G.UndirEdgeNum = Fintype.card (↑(G.UndirEdge)) := G.UndirEdgeNum_eq_card_UndirEdge
+ have hdirhand : FinGraph.DirNoEdges X = FinGraph.Degsum X := FinGraph.DirHandshake X
+ have hdircard : FinGraph.DirNoEdges X = Fintype.card (DirEdge X.G) := DirNoEdges_eq_card_DirEdge X
+ have htwo : Fintype.card (DirEdge X.G) = 2 * Fintype.card (↑(UndirEdge X.G)) :=
+ card_DirEdge_eq_two_card_UndirEdge X
+ have hundir : UndirEdgeNum X = Fintype.card (↑(UndirEdge X.G)) := UndirEdgeNum_eq_card_UndirEdge X
  calc
-  FinSimpGraph.Degsum G = G.DirNoEdges := by
+  FinGraph.Degsum X = FinGraph.DirNoEdges X := by
     simp [hdirhand]
-  _ = Fintype.card (G.DirEdge) := hdircard
-  _ = 2 * Fintype.card (↑(G.UndirEdge)) := htwo
-  _ = 2 * G.UndirEdgeNum := by
+  _ = Fintype.card (DirEdge X.G) := hdircard
+  _ = 2 * Fintype.card (↑(UndirEdge X.G)) := htwo
+  _ = 2 * UndirEdgeNum X := by
     simp [hundir]
