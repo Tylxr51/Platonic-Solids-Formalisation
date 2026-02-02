@@ -1,6 +1,6 @@
 import Mathlib.Tactic
 import Mathlib.Data.Sym.Sym2
-import MA4N1_Platonic_Solids.Simple_Graph_Theory
+import MA4N1_Platonic_Solids.Old.Simple_Graph_Theory
 
 -- We currently count directed edges as ordered pairs. We now want an undirected edge set.
 -- That is, instead of DirEdgeSet = {(u,v) | G.adj u v}, we have EdgeSet = {{u,v} | G.adj uv}
