@@ -138,24 +138,25 @@ def DirEdgeBuild (X : FinGraph) (u v : X.VertSet) (h : X.G.adj u v) : DirEdge X.
 lemma characterise_members (X : FinGraph) (u v : X.VertSet) (de : DirEdge X.G) :
     VertSet_to_Sym2 X.G de = Sym2.mk (u, v) ↔ de.1 = (u, v) ∨ de.1 = (v, u) := by
         constructor -- Break into the forward and backward directions
-        intro heq1
-        have ha : (de.1.1 = u ∧ de.1.2 = v) ∨ (de.1.1 = v ∧ de.1.2 = u) := by
-            have : Sym2.mk de.1 = Sym2.mk (u, v) := by
-                simpa [VertSet_to_Sym2] using heq1
-            exact (sym2_classify (u1 := de.1.1) (v1 := de.1.2) (u2 := u) (v2 := v) this)
+        ·   intro heq1
+            have ha : (de.1.1 = u ∧ de.1.2 = v) ∨ (de.1.1 = v ∧ de.1.2 = u) := by
+                have : Sym2.mk de.1 = Sym2.mk (u, v) := by
+                    simpa [VertSet_to_Sym2] using heq1
+                exact (sym2_classify (u1 := de.1.1) (v1 := de.1.2) (u2 := u) (v2 := v) this)
+
         -- We have two separate cases to consider, (↑e).1 = u ∧ (↑e).2 = v,
         -- and (↑e).1 = v ∧ (↑e).2 = u
         -- So can split into the left and right hand sides of 'or' (i.e ∨)
-        cases ha with
-        | inl huv =>
-            left
-            -- Again, split into two cases of either side of 'and' (i.e ∧)
-            rcases huv with ⟨hu, hv⟩
-            ext <;> simp [hu, hv]
-        | inr hvu =>
-            right
-            rcases hvu with ⟨hu, hv⟩
-            ext <;> simp [hu, hv]
+            cases ha with
+            | inl huv =>
+                left
+                -- Again, split into two cases of either side of 'and' (i.e ∧)
+                rcases huv with ⟨hu, hv⟩
+                ext <;> simp [hu, hv]
+            | inr hvu =>
+                right
+                rcases hvu with ⟨hu, hv⟩
+                ext <;> simp [hu, hv]
         intro heq2
         cases heq2 with
         | inl hpairl =>
