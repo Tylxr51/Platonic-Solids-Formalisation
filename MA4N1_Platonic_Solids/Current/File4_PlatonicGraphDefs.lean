@@ -33,6 +33,9 @@ structure PlanarGraph (X : FinGraph) where
     instFace : Fintype Face
     FaceDeg : Face → ℕ
 
+    nonemptyVerts : Nonempty X.VertSet
+attribute [instance] PlanarGraph.nonemptyVerts
+
 
 attribute [instance] PlanarGraph.instFace
 
@@ -69,6 +72,8 @@ structure PlatonicGraph where
     regular : RegularGraph X
     connected : ConnectedGraph X.G
     planar : PlanarGraph X
+
+
 
     m : ℕ
     uniformFaces : ∀ f : planar.Face, planar.FaceDeg f = m
@@ -110,3 +115,21 @@ theorem PlatonicGraph.hFaces (Pt : PlatonicGraph) :
             exact h1
         _ = 2 * Pt.X.ECard := by
             exact Pt.hFaceHandshake
+
+lemma m_pos_then_E_pos (Pt : PlatonicGraph) : Pt.regular.n > 0 → Pt.X.ECard > 0 := by
+    intro hn
+    classical
+
+  -- vertices are nonempty because PlanarGraph has nonemptyVerts
+    have hV : Pt.X.VCard > 0 := by
+        simpa [FinGraph.VCard] using (Fintype.card_pos_iff.mpr Pt.planar.nonemptyVerts)
+
+
+  -- n * VCard > 0
+    have hmul : Pt.regular.n * Pt.X.VCard > 0 :=
+        Nat.mul_pos hn hV
+
+  -- rewrite using Pt.hVerts to show 2 * ECard > 0
+    have h2E : 2 * Pt.X.ECard > 0 := by
+        simpa [Pt.hVerts] using hmul
+    simpa [mul_comm] using h2E

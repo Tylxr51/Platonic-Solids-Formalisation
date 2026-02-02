@@ -13,8 +13,7 @@ theorem platonic_inequality
   (Pt : PlatonicGraph)
 
   (hm : Pt.m > 2)
-  (hn : Pt.regular.n > 2)
-  (hEpos : Pt.X.ECard > 0) :
+  (hn : Pt.regular.n > 2) :
 
   ((Pt.m : ℝ) - 2) * ((Pt.regular.n : ℝ) - 2) < 4 := by
 
@@ -60,6 +59,9 @@ theorem platonic_inequality
     have := congrArg (fun z : ℤ => (z : ℝ)) hEulerZ
     -- this `simp` should turn `(VN : ℤ : ℝ)` into `(VN : ℝ)` etc
     simpa [V, E, F, VN, EN, FN] using this
+
+  have hEpos : Pt.X.ECard > 0 :=
+    m_pos_then_E_pos Pt (lt_trans (by decide : (0 : ℕ) < 2) hn)
 
   -- positivity / nonzero in ℝ
   have hmR : m > 0 := by
