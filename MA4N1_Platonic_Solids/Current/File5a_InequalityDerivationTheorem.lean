@@ -138,3 +138,24 @@ theorem platonic_inequality
   -- Putting h_factor and h_neg_lhs_neg_add_four together gives us
   -- the final inequality which we can apply
   apply lt_of_eq_of_lt h_factor h_neg_lhs_neg_add_four
+
+
+
+-- Changed variables to be in ℝ, but to connect to Platonic classification, might need a
+-- lemma that casts them to the naturals
+-- Just general lemmas at the moment, not relating to Platonic Graphs so will keep as just hm and hn
+-- instead of writing hmgt2 and hngt2
+lemma cast_sub_two (m : ℕ) (hm : m > 2) : ((m - 2 : ℕ) : ℝ) = (m : ℝ) - 2 := by
+  simpa using (Nat.cast_sub (le_of_lt hm) : ((m - 2 : ℕ) : ℝ) = (m : ℝ) - (2 : ℝ))
+
+lemma nat_ineq_of_real_ineq
+  (m n : ℕ) (hm : m > 2) (hn : n > 2) (hR : ((m : ℝ) - 2) * ((n : ℝ) - 2) < 4) :
+  (m - 2) * (n - 2) < 4 := by
+    have h1 :
+        ((m - 2 : ℕ) : ℝ) * ((n - 2 : ℕ) : ℝ) < 4 := by
+      simpa [cast_sub_two m hm, cast_sub_two n hn] using hR
+
+    have h2 : (((m - 2) * (n - 2) : ℕ) : ℝ) < 4 := by
+      simpa [Nat.cast_mul] using h1
+
+    exact_mod_cast h2

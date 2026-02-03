@@ -47,7 +47,7 @@ def PlanarGraph.FaceDegSum {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
     ∑ f : Pl.Face, Pl.FaceDeg f
 
 
-theorem PlanarGraph.hEuler (X : FinGraph) (Pl : PlanarGraph X) :
+theorem PlanarGraph.hEuler (X : FinGraph) (Pl : PlanarGraph X) :-- change to connected planar
     (X.VCard : ℤ) - (X.ECard : ℤ) + (Pl.FCard : ℤ) = 2 := by
         sorry
 
@@ -130,3 +130,87 @@ lemma m_pos_then_E_pos (Pt : PlatonicGraph) : Pt.regular.n > 0 → Pt.X.ECard > 
     have h2E : 2 * Pt.X.ECard > 0 := by
         simpa [Pt.hVerts] using hmul
     simpa [mul_comm] using h2E
+
+
+
+
+
+
+
+
+
+-- Take S to be a finite subset of VertSet, and define a new graph with vertex set {v // v ∉ S}
+-- i.e. not we take the graph where S has been deleted from the vertex set.
+-- Keep the same symmetry, looplessness, adjacency (between leftover vertices only, doesn't keep
+-- the edges with any removed vertex as a node)
+
+def SimpGraph.deleteVerts {VertSet : Type*} (G : SimpGraph VertSet) (S : Finset VertSet) :
+    SimpGraph {v // v ∉ S} where
+        adj u v := G.adj u.1 v.1
+        symm := by
+            intro u v huv
+            exact G.symm huv
+        loopless := by
+            intro u huu
+            exact G.loopless u.1 huu
+
+-- The following is an abstract lemma, kept abstract without inferring much graph theory that we can
+-- implement later on. It takes a relation r (for later, will be X.G.adj) and a property p (for
+-- later, will be p x := x ∉ S)
+
+-- Essentially, the lemma is telling us 'If there is a path between u and v with adjacency of the
+-- graph with vertex set V \ S, then there is a path between the underlying vertices using adjacency
+-- of the original graph'.
+
+lemma ReflTransGen_subtype_val {VertSet : Type*} {r : VertSet → VertSet → Prop}
+    {p : VertSet → Prop} {u v : {x // p x}} :
+    Relation.ReflTransGen (fun a b : {x // p x} => r a.1 b.1) u v →
+    Relation.ReflTransGen r u.1 v.1 := by
+  intro h
+  induction h with
+  | refl =>
+      exact Relation.ReflTransGen.refl
+  | tail h₁ h₂ ih =>
+      -- h₂ : r (Subtype.val _) (Subtype.val _)
+      exact Relation.ReflTransGen.tail ih h₂
+
+-- We now need to define what it means to be 3-Connected, written as a structure.
+-- Do we need to say that the size of VertSet is > 3 to make 3-connectedness not be weird????
+-- 3-Connected say remocing any two vertices of a connected graph results in the graph remaining
+-- connected, so we let S.card < 3. Then apply the adjacency relation on the subgraph.
+
+structure ThreeConnectedGraph (X : FinGraph) where
+  isThreeConnected :
+    ∀ (S : Finset X.VertSet), S.card < 3 →
+      ∀ u v : {x // x ∉ S}, Relation.ReflTransGen (SimpGraph.deleteVerts X.G S).adj u v
+
+-- The following lemma is a sanity check, that 3-Connected still implies connected, so in the
+-- definition of platonic graph, we can remove the reuquirement of connected and jsut have
+-- 3-connected if we wanted to.
+-- It is quite clear that if it is 3-connected, it is connected. If we remain connected after
+-- removing vertices, we must have been connected before. We can prove this by taking S = ∅,
+-- and then the deleted graph is just the original, which is connected by assumption.
+
+lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (T : ThreeConnectedGraph X) :
+    ConnectedGraph X.G := by
+        refine ⟨?_⟩
+        intro u v
+
+  -- Let S = ∅, conclude by 3-connectendess that the new graph with V \ S vertex set is connected,
+  -- but this is just the graph with vertex set V, i.e. our original graph
+        have hdel :=
+            T.isThreeConnected (S := (∅ : Finset X.VertSet)) (by simp) ⟨u, by simp⟩ ⟨v, by simp⟩
+
+        -- Need to actually conclude that the adjacency relation on the graph with nothing removed
+        -- is in fact the same adjacency relation we staretd with... 🤬
+        have hlift :
+            Relation.ReflTransGen
+                (fun a b : {x // x ∉ (∅ : Finset X.VertSet)} => X.G.adj a.1 b.1)
+                ⟨u, by simp⟩ ⟨v, by simp⟩ := by
+            simpa [SimpGraph.deleteVerts] using hdel
+
+        -- Now just forget the subtype and have the underlying path in the original graph. Use the
+        -- 'ReflTransGen_subtype_val' lemma with r := X.G.adj and p x := x ∉ ∅
+        simpa using
+            (ReflTransGen_subtype_val (r := X.G.adj) (p := fun x =>
+            x ∉ (∅ : Finset X.VertSet)) hlift)
