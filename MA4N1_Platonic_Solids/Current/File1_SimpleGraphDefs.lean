@@ -6,11 +6,12 @@ import Mathlib.Data.Fintype.Prod
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
 
-
+-- Simple Graph
 structure SimpGraph (VertSet : Type*) where
     (adj : VertSet → VertSet → Prop)
     (symm : Symmetric adj)
     (loopless : Irreflexive adj)
+
 
 structure FinGraph where
     VertSet : Type*
@@ -19,19 +20,23 @@ structure FinGraph where
     G : SimpGraph VertSet
     instAdj : DecidableRel G.adj
 
--- make an instance of instV
+
+-- make an instance of VertSet and G.adj
 attribute [instance] FinGraph.instVertSet
 attribute [instance] FinGraph.instAdj
+
 
 -- Standard definition of the neighbourhood of a vertex
 def SimpGraph.Nbhd {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) : Set VertSet :=
   {u | G.adj v u}
+
 
 -- The adjacent edgeset of a vertex v is the set of directed edges from v.
 -- As with many of the following definitions, this should technically be
 -- unordered pairs but in this case it doesn't make much difference for us
 def SimpGraph.AdjEdgeset {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) :
     Set (VertSet × VertSet) := {(v',u) : VertSet × VertSet | v'=v ∧ u ∈ SimpGraph.Nbhd G v}
+
 
 -- Needed to show that if V is finite then so is any adjacent edgeset
 noncomputable
@@ -45,12 +50,14 @@ instance FinGraph.FinAdjEdgeset (X : FinGraph) (v : X.VertSet) :
         exact Set.finite_univ.subset (by intro x hx; trivial)
     exact h1.fintype
 
+
 -- I needed to be able to convert the adjacent edgeset to a finset for our
 -- argument in the case that V is finite. That is what this defintion does
 noncomputable
 def FinGraph.AdjEdgeFinset (X : FinGraph) (v : X.VertSet) :
     Finset (X.VertSet × X.VertSet) :=
     (X.G.AdjEdgeset v).toFinset
+
 
 -- Typically, the degree might be defined as the cardinality of the neighbourhood
 -- but it is easy to see that this definition is equivalent.
@@ -60,7 +67,8 @@ noncomputable
 def FinGraph.Deg (X : FinGraph) (v : X.VertSet) : ℕ :=
     Finset.card (FinGraph.AdjEdgeFinset X v)
 
--- Degsum is the sum of the degrees #wow
+
+-- Degsum is the sum of the degrees
 noncomputable
 def FinGraph.Degsum (X : FinGraph) : ℕ :=
   ∑ v : X.VertSet, FinGraph.Deg X v

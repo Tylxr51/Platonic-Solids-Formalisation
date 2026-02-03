@@ -4,7 +4,7 @@ import MA4N1_Platonic_Solids.Current.File3_UndirectedEdgeHandshake
 
 
 
-
+-- Cardinality defintions
 def FinGraph.VCard (X : FinGraph) : ℕ :=
     Fintype.card X.VertSet
 
@@ -23,121 +23,8 @@ structure RegularGraph (X : FinGraph) where
 structure ConnectedGraph {VertSet : Type*} (G : SimpGraph VertSet) where
     isConnected : ∀ u v : VertSet, Relation.ReflTransGen G.adj u v
 
--- Define Planar Graph as Finite Graph that is Planar (not defined), has Faces, and
--- has V - E + F = 2. We do not define planarity as it is out of the scope of this project,
--- so we simply state is as a property
-structure PlanarGraph (X : FinGraph) where
-    isPlanar : Prop := True
-
-    Face : Type*
-    instFace : Fintype Face
-    FaceDeg : Face → ℕ
-
-    nonemptyVerts : Nonempty X.VertSet
-attribute [instance] PlanarGraph.nonemptyVerts
-
-
-attribute [instance] PlanarGraph.instFace
-
-def PlanarGraph.FCard {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
-    Fintype.card Pl.Face
-
-noncomputable
-def PlanarGraph.FaceDegSum {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
-    ∑ f : Pl.Face, Pl.FaceDeg f
-
-
-theorem PlanarGraph.hEuler (X : FinGraph) (Pl : PlanarGraph X) :-- change to connected planar
-    (X.VCard : ℤ) - (X.ECard : ℤ) + (Pl.FCard : ℤ) = 2 := by
-        sorry
-
--- now we have a definition of regularity, we need to show that FinGraph.Degsum X = n*V so we
--- can apply our UndirHandshake theorem
-
-lemma Degsum_eq_n_mul_VCard (X : FinGraph) (R : RegularGraph X) :
-    FinGraph.Degsum X = R.n * X.VCard := by
-        unfold FinGraph.Degsum
-        simp [R.isRegular, FinGraph.VCard]
-        apply mul_comm
-
-theorem nV_UndirHandshake (X : FinGraph) (R : RegularGraph X) [DecidableRel X.G.adj] :
-    R.n * X.VCard = 2 * UndirEdgeNum X := by
-        rw[← Degsum_eq_n_mul_VCard]
-        apply UndirHandshake
-
-
-
-structure PlatonicGraph where
-    X : FinGraph
-    regular : RegularGraph X
-    connected : ConnectedGraph X.G
-    planar : PlanarGraph X
-
-
-
-    m : ℕ
-    uniformFaces : ∀ f : planar.Face, planar.FaceDeg f = m
-
-    hFaceHandshake : planar.FaceDegSum = 2 * X.ECard
-
-
-theorem PlatonicGraph.hVerts (Pt : PlatonicGraph) :
-    Pt.regular.n * Pt.X.VCard = 2 * Pt.X.ECard := by
-        simp [FinGraph.ECard]
-        simpa using (nV_UndirHandshake Pt.X Pt.regular)
-
-
-
-theorem PlatonicGraph.hFaces (Pt : PlatonicGraph) :
-    Pt.m * Pt.planar.FCard = 2 * Pt.X.ECard := by
-    classical
-
-    -- Expand FaceDegSum
-    have h1 : Pt.planar.FaceDegSum = ∑ f : Pt.planar.Face, Pt.m := by
-        -- use uniformFaces to rewrite each FaceDeg f as m
-        simp [PlanarGraph.FaceDegSum, Pt.uniformFaces]
-
-    -- Turn sum of constant into m * number of faces
-    have h2 : (∑ f : Pt.planar.Face, Pt.m) = Pt.m * Pt.planar.FCard := by
-        simp [PlanarGraph.FCard]
-        apply mul_comm
-
-    -- Now combine with the handshake assumption
-    calc
-        Pt.m * Pt.planar.FCard = ∑ f : Pt.planar.Face, Pt.m := by
-            symm
-            exact h2
-        _ = Pt.planar.FaceDegSum := by
-            symm
-            exact h1
-        _ = 2 * Pt.X.ECard := by
-            exact Pt.hFaceHandshake
-
-lemma m_pos_then_E_pos (Pt : PlatonicGraph) : Pt.regular.n > 0 → Pt.X.ECard > 0 := by
-    intro hn
-    classical
-
-  -- vertices are nonempty because PlanarGraph has nonemptyVerts
-    have hV : Pt.X.VCard > 0 := by
-        simpa [FinGraph.VCard] using (Fintype.card_pos_iff.mpr Pt.planar.nonemptyVerts)
-
-
-  -- n * VCard > 0
-    have hmul : Pt.regular.n * Pt.X.VCard > 0 :=
-        Nat.mul_pos hn hV
-
-  -- rewrite using Pt.hVerts to show 2 * ECard > 0
-    have h2E : 2 * Pt.X.ECard > 0 := by
-        simpa [Pt.hVerts] using hmul
-    simpa [mul_comm] using h2E
-
-
-
-
-
-
-
-
+-- For a platonic graph, we need 3-Connectedness and not just connectedness.
+-- To create this structure, we need to do some work first:
 
 -- Take S to be a finite subset of VertSet, and define a new graph with vertex set {v // v ∉ S}
 -- i.e. not we take the graph where S has been deleted from the vertex set.
@@ -191,7 +78,7 @@ structure ThreeConnectedGraph (X : FinGraph) where
 -- removing vertices, we must have been connected before. We can prove this by taking S = ∅,
 -- and then the deleted graph is just the original, which is connected by assumption.
 
-lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (T : ThreeConnectedGraph X) :
+lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (TC : ThreeConnectedGraph X) :
     ConnectedGraph X.G := by
         refine ⟨?_⟩
         intro u v
@@ -199,7 +86,7 @@ lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (T : ThreeConnectedGra
   -- Let S = ∅, conclude by 3-connectendess that the new graph with V \ S vertex set is connected,
   -- but this is just the graph with vertex set V, i.e. our original graph
         have hdel :=
-            T.isThreeConnected (S := (∅ : Finset X.VertSet)) (by simp) ⟨u, by simp⟩ ⟨v, by simp⟩
+            TC.isThreeConnected (S := (∅ : Finset X.VertSet)) (by simp) ⟨u, by simp⟩ ⟨v, by simp⟩
 
         -- Need to actually conclude that the adjacency relation on the graph with nothing removed
         -- is in fact the same adjacency relation we staretd with... 🤬
@@ -214,3 +101,126 @@ lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (T : ThreeConnectedGra
         simpa using
             (ReflTransGen_subtype_val (r := X.G.adj) (p := fun x =>
             x ∉ (∅ : Finset X.VertSet)) hlift)
+
+
+
+-- Define Planar Graph as Finite Graph that is Planar (not defined) and has Faces
+structure PlanarGraph (X : FinGraph) where
+    isPlanar : Prop := True
+
+    Face : Type*
+    instFace : Fintype Face
+    FaceDeg : Face → ℕ
+
+attribute [instance] PlanarGraph.instFace
+
+def PlanarGraph.FCard {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
+    Fintype.card Pl.Face
+
+noncomputable
+def PlanarGraph.FaceDegSum {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
+    ∑ f : Pl.Face, Pl.FaceDeg f
+
+
+theorem PlanarGraph.hEuler (X : FinGraph)
+    (Pl : PlanarGraph X) (C : ConnectedGraph X.G) :
+    (X.VCard : ℤ) - (X.ECard : ℤ) + (Pl.FCard : ℤ) = 2 := by
+        sorry
+
+-- now we have a definition of regularity, we need to show that FinGraph.Degsum X = n*V so we
+-- can apply our UndirHandshake theorem
+
+lemma Degsum_eq_n_mul_VCard (X : FinGraph) (R : RegularGraph X) :
+    FinGraph.Degsum X = R.n * X.VCard := by
+        unfold FinGraph.Degsum
+        simp [R.isRegular, FinGraph.VCard]
+        apply mul_comm
+
+theorem nV_UndirHandshake (X : FinGraph) (R : RegularGraph X) [DecidableRel X.G.adj] :
+    R.n * X.VCard = 2 * UndirEdgeNum X := by
+        rw[← Degsum_eq_n_mul_VCard]
+        apply UndirHandshake
+
+
+
+structure PlatonicGraph where
+    X : FinGraph
+    regular : RegularGraph X
+    threeConnected : ThreeConnectedGraph X
+    planar : PlanarGraph X
+
+    m : ℕ
+
+    uniformFaces : ∀ f1 f2 : planar.Face, planar.FaceDeg f1 = planar.FaceDeg f2
+
+    f₀ : planar.Face
+    hmdef : m = planar.FaceDeg f₀
+
+
+    nonemptyVerts : Nonempty X.VertSet
+    hmgt2 : m > 2
+    hngt2 : regular.n > 2
+
+    hFaceHandshake : planar.FaceDegSum = 2 * X.ECard
+
+
+attribute [instance] PlatonicGraph.nonemptyVerts
+
+lemma PlatonicGraph.m_uniform (Pt : PlatonicGraph) :
+    ∀ f : Pt.planar.Face, Pt.planar.FaceDeg f = Pt.m := by
+        intro f
+        simp [hmdef]
+        exact Pt.uniformFaces f Pt.f₀
+
+
+theorem PlatonicGraph.hVerts (Pt : PlatonicGraph) :
+    Pt.regular.n * Pt.X.VCard = 2 * Pt.X.ECard := by
+        simp [FinGraph.ECard]
+        simpa using (nV_UndirHandshake Pt.X Pt.regular)
+
+
+
+theorem PlatonicGraph.hFaces (Pt : PlatonicGraph) :
+    Pt.m * Pt.planar.FCard = 2 * Pt.X.ECard := by
+    classical
+
+    -- Expand FaceDegSum
+    have h1 : Pt.planar.FaceDegSum = ∑ f : Pt.planar.Face, Pt.m := by
+        -- use uniformFaces to rewrite each FaceDeg f as m
+        simp [PlanarGraph.FaceDegSum]
+        simp [hmdef]
+        simp [PlatonicGraph.m_uniform]
+
+    -- Turn sum of constant into m * number of faces
+    have h2 : (∑ f : Pt.planar.Face, Pt.m) = Pt.m * Pt.planar.FCard := by
+        simp [PlanarGraph.FCard]
+        apply mul_comm
+
+    -- Now combine with the handshake assumption
+    calc
+        Pt.m * Pt.planar.FCard = ∑ f : Pt.planar.Face, Pt.m := by
+            symm
+            exact h2
+        _ = Pt.planar.FaceDegSum := by
+            symm
+            exact h1
+        _ = 2 * Pt.X.ECard := by
+            exact Pt.hFaceHandshake
+
+lemma m_pos_then_E_pos (Pt : PlatonicGraph) : Pt.regular.n > 0 → Pt.X.ECard > 0 := by
+    intro hn
+    classical
+
+  -- vertices are nonempty because PlanarGraph has nonemptyVerts
+    have hV : Pt.X.VCard > 0 := by
+        simpa [FinGraph.VCard] using (Fintype.card_pos_iff.mpr Pt.nonemptyVerts)
+
+
+  -- n * VCard > 0
+    have hmul : Pt.regular.n * Pt.X.VCard > 0 :=
+        Nat.mul_pos hn hV
+
+  -- rewrite using Pt.hVerts to show 2 * ECard > 0
+    have h2E : 2 * Pt.X.ECard > 0 := by
+        simpa [Pt.hVerts] using hmul
+    simpa [mul_comm] using h2E

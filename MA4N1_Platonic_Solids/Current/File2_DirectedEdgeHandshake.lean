@@ -1,10 +1,13 @@
 import MA4N1_Platonic_Solids.Current.File1_SimpleGraphDefs
+
+
 -- Defining the directed edgeset of a graph. Again, since we are working with
 -- simple graphs this should really be unordered pairs.
 -- Should be able to correct this with Sym2 but I was too far in by the time
 -- I noticed
 def SimpGraph.DirEdgeset {VertSet : Type*} (G : SimpGraph VertSet) :
     Set (VertSet × VertSet) := { (u,v) | G.adj u v }
+
 
 -- Our first lemma, showing that the union of all the adjacent edgesets of
 -- each vertex is the edgeset of the graph #noway
@@ -35,6 +38,7 @@ lemma SimpGraph.EdgesetEqUnionAdjEdge {VertSet : Type*} (G : SimpGraph VertSet) 
     apply Exists.intro _
     apply h3
 
+
 -- Similar to what we did for AdjEdgeset, we need that if the graph is finite
 -- then so is the edgeset
 noncomputable
@@ -46,10 +50,12 @@ instance FinGraph.FinEdgeset (X : FinGraph) :
         exact Set.finite_univ.subset (by intro x hx; trivial)
     exact h1.fintype
 
+
 -- and need a definition to convert the edgeset to a finset in this case
 noncomputable
 def FinGraph.DirNoEdges (X : FinGraph) : ℕ :=
     Finset.card (SimpGraph.DirEdgeset X.G).toFinset
+
 
 lemma SimpGraph.DirEdgesetDisjoint {VertSet : Type*} (G : SimpGraph VertSet) :
 ∀ ⦃v u : VertSet⦄, v ≠ u → Disjoint (G.AdjEdgeset v) (G.AdjEdgeset u) := by
@@ -79,6 +85,7 @@ lemma SimpGraph.DirEdgesetDisjoint {VertSet : Type*} (G : SimpGraph VertSet) :
     have h9 : u=v := by
         exact h8.symm.trans h6
     contradiction
+
 
 -- I then realised that I actually need this for the finite case and lean
 -- is too thick to easily go between the two. This could probably be proven
@@ -114,6 +121,7 @@ lemma FinGraph.DirEdgeFinsetDisjoint (X : FinGraph) :
     have h9 : u=v := by
         exact h8.symm.trans h6
     contradiction
+
 
 -- Finally, here is our directed version of the handshaking lemma
 theorem FinGraph.DirHandshake (X : FinGraph) :

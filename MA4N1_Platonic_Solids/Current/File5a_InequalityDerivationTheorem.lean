@@ -1,19 +1,17 @@
-import Mathlib.Tactic.Linarith
 import MA4N1_Platonic_Solids.Current.File1_SimpleGraphDefs
 import MA4N1_Platonic_Solids.Current.File2_DirectedEdgeHandshake
 import MA4N1_Platonic_Solids.Current.File3_UndirectedEdgeHandshake
 import MA4N1_Platonic_Solids.Current.File4_PlatonicGraphDefs
 import MA4N1_Platonic_Solids.Current.File5b_InequalityDerivationLemmas
 
+import Mathlib.Tactic.Linarith
 
 
 
-theorem platonic_inequality
 
-  (Pt : PlatonicGraph)
+theorem platonic_inequality_in_R
 
-  (hmgt2 : Pt.m > 2)
-  (hngt2 : Pt.regular.n > 2) :
+  (Pt : PlatonicGraph) :
 
   ((Pt.m : ℝ) - 2) * ((Pt.regular.n : ℝ) - 2) < 4 := by
 
@@ -32,6 +30,9 @@ theorem platonic_inequality
 
   change (m - 2) * (n - 2) < 4
 
+  have hmgt2 : Pt.m > 2 := Pt.hmgt2
+  have hngt2 : Pt.regular.n > 2 := Pt.hngt2
+
   -- get real equations
   have hFacesR : (Pt.m : ℝ) * (Pt.planar.FCard : ℝ) = 2 * (Pt.X.ECard : ℝ) := by
     exact_mod_cast Pt.hFaces
@@ -47,7 +48,7 @@ theorem platonic_inequality
 
   have hEuler : V - E + F = 2 := by
     have hEulerZ : (Pt.X.VCard : ℤ) - (Pt.X.ECard : ℤ) + (Pt.planar.FCard : ℤ) = 2 :=
-      PlanarGraph.hEuler Pt.X Pt.planar
+      PlanarGraph.hEuler Pt.X Pt.planar Pt.threeConnected.toConnectedGraph
     have := congrArg (fun z : ℤ => (z : ℝ)) hEulerZ
     -- this `simp` should turn `(VN : ℤ : ℝ)` into `(VN : ℝ)` etc
     simpa [V, E, F] using this
@@ -141,10 +142,9 @@ theorem platonic_inequality
 
 
 
--- Changed variables to be in ℝ, but to connect to Platonic classification, might need a
--- lemma that casts them to the naturals
--- Just general lemmas at the moment, not relating to Platonic Graphs so will keep as just hm and hn
--- instead of writing hmgt2 and hngt2
+-- The theorem we just proved is in ℝ because we needed to use division which is easier to do in ℝ
+-- However, m and n are in ℕ by definition, so let's convert it back to ℕ
+
 lemma cast_sub_two (m : ℕ) (hm : m > 2) : ((m - 2 : ℕ) : ℝ) = (m : ℝ) - 2 := by
   simpa using (Nat.cast_sub (le_of_lt hm) : ((m - 2 : ℕ) : ℝ) = (m : ℝ) - (2 : ℝ))
 
@@ -159,3 +159,8 @@ lemma nat_ineq_of_real_ineq
       simpa [Nat.cast_mul] using h1
 
     exact_mod_cast h2
+
+
+lemma platonic_ineqality (Pt : PlatonicGraph) : (Pt.m - 2) * (Pt.regular.n - 2) < 4 :=
+
+  nat_ineq_of_real_ineq Pt.m Pt.regular.n Pt.hmgt2 Pt.hngt2 (platonic_inequality_in_R Pt)
