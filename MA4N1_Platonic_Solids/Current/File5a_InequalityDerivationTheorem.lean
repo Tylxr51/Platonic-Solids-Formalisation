@@ -161,6 +161,6 @@ lemma nat_ineq_of_real_ineq
     exact_mod_cast h2
 
 
-lemma platonic_ineqality (Pt : PlatonicGraph) : (Pt.m - 2) * (Pt.regular.n - 2) < 4 :=
+lemma platonic_inequality (Pt : PlatonicGraph) : (Pt.m - 2) * (Pt.regular.n - 2) < 4 :=
 
   nat_ineq_of_real_ineq Pt.m Pt.regular.n Pt.hmgt2 Pt.hngt2 (platonic_inequality_in_R Pt)
