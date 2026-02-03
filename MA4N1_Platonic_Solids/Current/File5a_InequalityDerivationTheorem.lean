@@ -12,8 +12,8 @@ theorem platonic_inequality
 
   (Pt : PlatonicGraph)
 
-  (hm : Pt.m > 2)
-  (hn : Pt.regular.n > 2) :
+  (hmgt2 : Pt.m > 2)
+  (hngt2 : Pt.regular.n > 2) :
 
   ((Pt.m : ℝ) - 2) * ((Pt.regular.n : ℝ) - 2) < 4 := by
 
@@ -21,18 +21,14 @@ theorem platonic_inequality
   ------------------------------------------------------------------------------
 
   -- set up shorthand (NAT)
-  let mN : ℕ := Pt.m
-  let nN : ℕ := Pt.regular.n
-  let VN : ℕ := Pt.X.VCard
-  let EN : ℕ := Pt.X.ECard
-  let FN : ℕ := Pt.planar.FCard
+  let m : ℝ := Pt.m
+  let n : ℝ := Pt.regular.n
+  let V : ℝ := Pt.X.VCard
+  let E : ℝ := Pt.X.ECard
+  let F : ℝ := Pt.planar.FCard
 
   -- now define REAL versions
-  let m : ℝ := (mN : ℝ)
-  let n : ℝ := (nN : ℝ)
-  let V : ℝ := (VN : ℝ)
-  let E : ℝ := (EN : ℝ)
-  let F : ℝ := (FN : ℝ)
+
 
   change (m - 2) * (n - 2) < 4
 
@@ -49,35 +45,39 @@ theorem platonic_inequality
   have hVerts : n * V = 2 * E := by
     simpa [n, V, E] using hVertsR
 
-
-
-  have hEulerZ : (VN : ℤ) - (EN : ℤ) + (FN : ℤ) = 2 := PlanarGraph.hEuler Pt.X Pt.planar
-
   have hEuler : V - E + F = 2 := by
+    have hEulerZ : (Pt.X.VCard : ℤ) - (Pt.X.ECard : ℤ) + (Pt.planar.FCard : ℤ) = 2 :=
+      PlanarGraph.hEuler Pt.X Pt.planar
     have := congrArg (fun z : ℤ => (z : ℝ)) hEulerZ
     -- this `simp` should turn `(VN : ℤ : ℝ)` into `(VN : ℝ)` etc
-    simpa [V, E, F, VN, EN, FN] using this
+    simpa [V, E, F] using this
 
-  have hEpos : Pt.X.ECard > 0 :=
-    m_pos_then_E_pos Pt (lt_trans (by decide : (0 : ℕ) < 2) hn)
+  have hEposPt : Pt.X.ECard > 0 :=
+    m_pos_then_E_pos Pt (lt_trans (by decide : (0 : ℕ) < 2) hngt2)
 
   -- positivity / nonzero in ℝ
-  have hmR : m > 0 := by
+  have hmpos : m > 0 := by
     -- hm : mN > 2
-    have : (mN : ℝ) > 0 := by exact_mod_cast (lt_trans (by decide : (0:ℕ) < 2) hm)
+    have : m > 0 := by
+      simp [m]
+      exact_mod_cast lt_trans (by decide : (0 : ℕ) < 2) hmgt2
     simpa [m] using this
 
-  have hnR : n > 0 := by
-    have : (nN : ℝ) > 0 := by exact_mod_cast (lt_trans (by decide : (0:ℕ) < 2) hn)
+  have hnpos : n > 0 := by
+    have : n > 0 := by
+      simp [n]
+      exact_mod_cast lt_trans (by decide : (0 : ℕ) < 2) hngt2
     simpa [n] using this
 
-  have hE : E > 0 := by
-    have : (EN : ℝ) > 0 := by exact_mod_cast hEpos
+  have hEpos : E > 0 := by
+    have : E > 0 := by
+      simp [E]
+      exact_mod_cast hEposPt
     simpa [E] using this
 
   -- From positivity get nonzero facts
-  have hm' : m ≠ 0 := by linarith [hm]
-  have hn' : n ≠ 0 := by linarith [hn]
+  have hm' : m ≠ 0 := by linarith [hmpos]
+  have hn' : n ≠ 0 := by linarith [hnpos]
   have hE' : E ≠ 0 := by linarith [hEpos]
 
   -- loads of errors from this point on
@@ -98,8 +98,8 @@ theorem platonic_inequality
 
   -- Define new hypothesis: RHS of hEuler_div_E is greater than 0
   have h_rhs_pos : 2 * (n * (m * E⁻¹)) > 0 := by
-    have mE_inv_pos : m * E⁻¹ > 0 := mul_pos (by linarith [hm]) (inv_pos.mpr hE)
-    have nmE_inv_pos : n * (m * E⁻¹) > 0 := mul_pos (by linarith [hn]) mE_inv_pos
+    have mE_inv_pos : m * E⁻¹ > 0 := mul_pos (by linarith [hmpos]) (inv_pos.mpr hEpos)
+    have nmE_inv_pos : n * (m * E⁻¹) > 0 := mul_pos (by linarith [hnpos]) mE_inv_pos
     exact mul_pos (by norm_num) nmE_inv_pos
 
   -- Flipping hEuler_div_E and h_rhs_pos so that tactics can be applied
