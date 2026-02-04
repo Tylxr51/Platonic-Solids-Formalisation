@@ -1,4 +1,5 @@
 import Mathlib.Tactic.IntervalCases
+import MA4N1_Platonic_Solids.Current.File4_PlatonicGraphDefs
 import MA4N1_Platonic_Solids.Current.File5a_InequalityDerivationTheorem
 
 
@@ -40,62 +41,36 @@ theorem classify_mn :
   simpa [PlatonicPairs] using h
 
 
-
-
-
--- Defining a map from the pair (m,n) to its associated platonic solid, and return
--- 'none' for other pairs
-def mn_solid : (ℕ × ℕ) → String
-| (3, 3) => "Tetrahedron"
-| (3, 4) => "Octahedron"
-| (3, 5) => "Icosahedron"
-| (4, 3) => "Cube"
-| (5, 3) => "Dodecahedron"
-| _      => "None"
-
-
--- Now name the Platonic Graph by looking at its pair (m, n)
-def PlatonicSolid (Pt : PlatonicGraph) : String :=
-  mn_solid (Pt.m, Pt.regular.n)
-
-
-
-
-
-
-
-theorem classify_Pt_mn_members (Pt : PlatonicGraph) (hmgt2 : Pt.m > 2) (hngt2 : Pt.regular.n > 2) :
+theorem classify_Pt_mn_members (Pt : PlatonicGraph) :
   (Pt.m, Pt.regular.n) ∈ PlatonicPairs := by
-  have hR :
-    ((Pt.m : ℝ) - 2) * ((Pt.regular.n : ℝ) - 2) < 4 := platonic_inequality Pt hmgt2 hngt2
-
-  -- cast the above hR to the naturals ℕ
-  have hN : (Pt.m - 2) * (Pt.regular.n - 2) < 4 :=
-    nat_ineq_of_real_ineq Pt.m Pt.regular.n hmgt2 hngt2 hR
 
   -- membership in the LHS set of classify_mn
   have hmem :
     (Pt.m, Pt.regular.n) ∈
       ({(m, n) : ℕ × ℕ | m > 2 ∧ n > 2 ∧ (m - 2) * (n - 2) < 4}) := by
-    exact ⟨hmgt2, hngt2, hN⟩
+    exact ⟨Pt.hmgt2, Pt.hngt2, platonic_inequality Pt⟩
 
   simpa [PlatonicPairs, classify_mn] using hmem
 
-def PlatonicSolidNames : Set String :=
-  ({"Tetrahedron", "Octahedron", "Icosahedron", "Cube", "Dodecahedron"} : Set String)
 
-theorem classify_Pt_name_mem (Pt : PlatonicGraph) (hmgt2 : Pt.m > 2) (hngt2 : Pt.regular.n > 2) :
-  PlatonicSolid Pt ∈ PlatonicSolidNames := by
+-- Defining a map from the pair (m,n) to its associated platonic solid, and return
+-- '[Not a Platonic Graph]' for other pairs
+def mn_graph_name : (ℕ × ℕ) → String
+| (3, 3) => "Tetrahedron Graph"
+| (3, 4) => "Octahedron Graph"
+| (3, 5) => "Icosahedron Graph"
+| (4, 3) => "Cube Graph"
+| (5, 3) => "Dodecahedron Graph"
+| _      => "[Not a Platonic Graph]"
+
+
+def PlatonicGraphNames : Set String :=
+  mn_graph_name '' PlatonicPairs
+
+theorem classify_Pt_name_mem (Pt : PlatonicGraph) :
+  mn_graph_name (Pt.m, Pt.regular.n) ∈ PlatonicGraphNames := by
     have hmem : (Pt.m, Pt.regular.n) ∈ PlatonicPairs :=
-      classify_Pt_mn_members Pt hmgt2 hngt2
+      classify_Pt_mn_members Pt
 
-    have hc :
-      (Pt.m, Pt.regular.n) = (3, 3) ∨
-      (Pt.m, Pt.regular.n) = (3, 4) ∨
-      (Pt.m, Pt.regular.n) = (3, 5) ∨
-      (Pt.m, Pt.regular.n) = (4, 3) ∨
-      (Pt.m, Pt.regular.n) = (5, 3) := by
-        simpa [PlatonicPairs, Set.mem_insert_iff, Set.mem_singleton_iff] using hmem
-
-    unfold PlatonicSolid PlatonicSolidNames
-    rcases hc with h | h | h | h | h <;> simp [mn_solid, h]
+    unfold PlatonicGraphNames
+    refine ⟨(Pt.m, Pt.regular.n), hmem, rfl⟩
