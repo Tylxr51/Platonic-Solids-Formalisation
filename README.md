@@ -24,7 +24,7 @@ where $V = |\text{Vertices}|$, $E =|\text{Edges}|$, $F =|\text{Faces}|$, $n = \d
 
 We are able to build hVerts from just our definitions as it only requires vertices and their relations. However, the other two both require the number of faces, which we have no actual definition of. Therefore, we have had to make a few more assumptions about faces: first, that each face has the same number of edges; second, that the sum of the edges of each face is twice the total number of edges. From these assumptions, we can then prove that hFaces holds for every PlatonicGraph.
 
-We also have to prove hEuler with `sorry` as it is both out of the scope of this project and would require a formal definition of both $F$ and $\verb+isPlanar+$.
+We also have to prove hEuler with `sorry` as it is both out of the scope of this project and would require a formal definition of both $F$ and $\verb+isPlanar.+$
 
 ## Shortcomings and Improvements 
 For the astute observers out there, you may have noticed that we haven't actually said anything about Platonic Solids. Instead, we have kind of worked on a problem that is parallel to our original goal. But there is good news $-$ Steinitz's Theorem states: 
@@ -32,3 +32,24 @@ For the astute observers out there, you may have noticed that we haven't actuall
 ```every convex polyhedron forms a 3-connected planar graph, and every 3-connected planar graph can be represented as the graph of a convex polyhedron```
 
 elliot can you help me write why this says we can use our result to show there are only 5 platonic graphs. we also wanna say something about how we cant do this in lean cos we dont have a definition of a platonic graph, but an improvement would be to formalise a geometric definition of it and make a map or smth. idk
+
+
+
+### Shortcomings & Improvements (Elliot's Better Version 😎)
+
+For the astute observers out there, you may have noticed that we haven't actually said anything about Platonic Solids. Instead, we have kind of worked on a problem that is parallel to our original goal. But there is good news $-$ Steinitz's Theorem states: 
+
+```every convex polyhedron forms a 3-connected planar graph, and every 3-connected planar graph can be represented as the graph of a convex polyhedron```
+
+Every convex polyhedron has an underlying graph formed by its vertices and edges in the natural way. A Platonic solid is a convex polyhedron with regular faces and the same degree at each vertex, which are encoded by the constants `m` and `n` in the definition of a `PlatonicGraph`.
+
+Steinitz’s Theorem provides the link between such graphs and geometric solids, and justifies our graph-theoretic approach to classifying Platonic solids.
+
+Steinitz’s Theorem has two relevant consequences for us:
+1.  The graph of any convex polyhedron is planar and 3-connected. This guarantees that every Platonic solid gives rise to a graph satisfying the structural assumptions encoded in our definition of `PlatonicGraph`.
+
+2. Conversely, Steinitz’s Theorem states that every planar, 3-connected graph can be realised as the graph of a convex polyhedron. When combined with the additional regularity and uniform face-degree assumptions of a `PlatonicGraph`, this polyhedron is necessarily a Platonic solid. This correspondence is **unique up to graph isomorphism: different geometric realizations with the same graph are considered the same for classification purposes.**
+
+Our formalization therefore classifies Platonic solids by classifying their underlying graphs. The parameters `(m, n)`, representing the number of edges per face and the degree of each vertex respectively, have the same meaning in both the graph-theoretic and geometric settings.
+
+By proving that only five pairs `(m, n)` satisfy the necessary constraints, we show that there are exactly five Platonic graphs (up to isomorphism). By Steinitz’s Theorem, each of these graphs corresponds to a convex polyhedron, which are exactly the five Platonic solids.
