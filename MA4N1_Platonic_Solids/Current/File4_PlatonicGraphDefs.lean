@@ -67,9 +67,10 @@ lemma ReflTransGen_subtype_val {VertSet : Type*} {r : VertSet → VertSet → Pr
 -- connected, so we let S.card < 3. Then apply the adjacency relation on the subgraph.
 
 structure ThreeConnectedGraph (X : FinGraph) where
-  isThreeConnected :
-    ∀ (S : Finset X.VertSet), S.card < 3 →
-      ∀ u v : {x // x ∉ S}, Relation.ReflTransGen (SimpGraph.deleteVerts X.G S).adj u v
+    VertSetgt3 : X.VCard > 3
+    isThreeConnected :
+        ∀ (S : Finset X.VertSet), S.card < 3 →
+        ∀ u v : {x // x ∉ S}, Relation.ReflTransGen (SimpGraph.deleteVerts X.G S).adj u v
 
 -- The following lemma is a sanity check, that 3-Connected still implies connected, so in the
 -- definition of platonic graph, we can remove the reuquirement of connected and jsut have
