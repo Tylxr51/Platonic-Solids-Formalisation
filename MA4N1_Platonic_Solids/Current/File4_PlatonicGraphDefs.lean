@@ -62,8 +62,7 @@ lemma ReflTransGen_subtype_val {VertSet : Type*} {r : VertSet → VertSet → Pr
       exact Relation.ReflTransGen.tail ih h₂
 
 -- We now need to define what it means to be 3-Connected, written as a structure.
--- Do we need to say that the size of VertSet is > 3 to make 3-connectedness not be weird????
--- 3-Connected say remocing any two vertices of a connected graph results in the graph remaining
+-- 3-Connected says removing any two vertices of a connected graph results in the graph remaining
 -- connected, so we let S.card < 3. Then apply the adjacency relation on the subgraph.
 
 structure ThreeConnectedGraph (X : FinGraph) where
@@ -73,11 +72,8 @@ structure ThreeConnectedGraph (X : FinGraph) where
         ∀ u v : {x // x ∉ S}, Relation.ReflTransGen (SimpGraph.deleteVerts X.G S).adj u v
 
 -- The following lemma is a sanity check, that 3-Connected still implies connected, so in the
--- definition of platonic graph, we can remove the reuquirement of connected and jsut have
+-- definition of platonic graph, we can remove the reuquirement of connected and just have
 -- 3-connected if we wanted to.
--- It is quite clear that if it is 3-connected, it is connected. If we remain connected after
--- removing vertices, we must have been connected before. We can prove this by taking S = ∅,
--- and then the deleted graph is just the original, which is connected by assumption.
 
 lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (TC : ThreeConnectedGraph X) :
     ConnectedGraph X.G := by
@@ -85,12 +81,12 @@ lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (TC : ThreeConnectedGr
         intro u v
 
   -- Let S = ∅, conclude by 3-connectendess that the new graph with V \ S vertex set is connected,
-  -- but this is just the graph with vertex set V, i.e. our original graph
+  -- but this is just the graph with vertex set V, i.e. our original graph.
         have hdel :=
             TC.isThreeConnected (S := (∅ : Finset X.VertSet)) (by simp) ⟨u, by simp⟩ ⟨v, by simp⟩
 
         -- Need to actually conclude that the adjacency relation on the graph with nothing removed
-        -- is in fact the same adjacency relation we staretd with... 🤬
+        -- is in fact the same adjacency relation we staretd with.
         have hlift :
             Relation.ReflTransGen
                 (fun a b : {x // x ∉ (∅ : Finset X.VertSet)} => X.G.adj a.1 b.1)
