@@ -1,5 +1,17 @@
 # MA4N1_Platonic_Solids
 
+## Github
+
+Link: https://github.com/Tylxr51/Platonic-Solids-Formalisation
+
+Contributors:
+- *Cadelliot* - Elliot Cadell **(2204857)**
+- *Tylxr51* - Tyler Graves **(2202289)**
+- *seantierney* - Sean Tierney **(2203421)**
+
+We would like to be marked equally and all receive the same mark. You may look at the history if you're interested :)
+
+
 ## Original goals
 
 At the start of this project, we set out to prove that there exists exactly $5$ Platonic Solids. Our approach to this was to define a Platonic Solid, derive an inequality, and show that this inequality only had $5$ solutions $-$ showing that there can only be $5$ unique Platonic Solids. We quickly found that this approach was flawed; we struggled to create a satisfactory definition for a Platonic Solid that didn't require a vast amount of geometric formalisation. In hindsight, this is quite obvious $-$ a Platonic Solid is after all a geometric object. We knew we wanted to steer clear of formalising geometric results in Lean as we had heard that it would be tricky and probably too much to handle. This is where we decided to take a different approach.
@@ -26,16 +38,7 @@ We are able to build hVerts from just our definitions as it only requires vertic
 
 We also have to prove hEuler with `sorry` as it is both out of the scope of this project and would require a formal definition of both $F$ and $\verb+isPlanar.+$
 
-## Shortcomings and Improvements 
-For the astute observers out there, you may have noticed that we haven't actually said anything about Platonic Solids. Instead, we have kind of worked on a problem that is parallel to our original goal. But there is good news $-$ Steinitz's Theorem states: 
-
-```every convex polyhedron forms a 3-connected planar graph, and every 3-connected planar graph can be represented as the graph of a convex polyhedron```
-
-elliot can you help me write why this says we can use our result to show there are only 5 platonic graphs. we also wanna say something about how we cant do this in lean cos we dont have a definition of a platonic graph, but an improvement would be to formalise a geometric definition of it and make a map or smth. idk
-
-
-
-### Shortcomings & Improvements (Elliot's Better Version 😎)
+### Shortcomings & Improvements
 
 For the astute observers out there, you may have noticed that we haven't actually said anything about Platonic Solids. Instead, we have kind of worked on a problem that is parallel to our original goal. But there is good news $-$ Steinitz's Theorem states: 
 
@@ -48,7 +51,7 @@ Steinitz’s Theorem provides the link between such graphs and geometric solids,
 Steinitz’s Theorem has two relevant consequences for us:
 1.  The graph of any convex polyhedron is planar and 3-connected. This guarantees that every Platonic solid gives rise to a graph satisfying the structural assumptions encoded in our definition of `PlatonicGraph`.
 
-2. Conversely, Steinitz’s Theorem states that every planar, 3-connected graph can be realised as the graph of a convex polyhedron. When combined with the additional regularity and uniform face-degree assumptions of a `PlatonicGraph`, this polyhedron is necessarily a Platonic solid. This correspondence is **unique up to graph isomorphism: different geometric realizations with the same graph are considered the same for classification purposes.**
+2. Conversely, Steinitz’s Theorem states that every planar, 3-connected graph can be realised as the graph of a convex polyhedron. When combined with the additional regularity and uniform face-degree assumptions of a `PlatonicGraph`, this polyhedron is necessarily a Platonic solid. This correspondence is unique up to graph isomorphism: different geometric realizations with the same graph are considered the same for classification purposes.
 
 Our formalization therefore classifies Platonic solids by classifying their underlying graphs. The parameters `(m, n)`, representing the number of edges per face and the degree of each vertex respectively, have the same meaning in both graph-theoretic and geometric terms.
 
