@@ -50,6 +50,6 @@ Steinitz’s Theorem has two relevant consequences for us:
 
 2. Conversely, Steinitz’s Theorem states that every planar, 3-connected graph can be realised as the graph of a convex polyhedron. When combined with the additional regularity and uniform face-degree assumptions of a `PlatonicGraph`, this polyhedron is necessarily a Platonic solid. This correspondence is **unique up to graph isomorphism: different geometric realizations with the same graph are considered the same for classification purposes.**
 
-Our formalization therefore classifies Platonic solids by classifying their underlying graphs. The parameters `(m, n)`, representing the number of edges per face and the degree of each vertex respectively, have the same meaning in both the graph-theoretic and geometric settings.
+Our formalization therefore classifies Platonic solids by classifying their underlying graphs. The parameters `(m, n)`, representing the number of edges per face and the degree of each vertex respectively, have the same meaning in both graph-theoretic and geometric terms.
 
-By proving that only five pairs `(m, n)` satisfy the necessary constraints, we show that there are exactly five Platonic graphs (up to isomorphism). By Steinitz’s Theorem, each of these graphs corresponds to a convex polyhedron, which are exactly the five Platonic solids.
+By proving that only five pairs `(m, n)` satisfy the necessary constraints, we show that there are exactly five Platonic graphs (up to isomorphism). By Steinitz’s Theorem, each of these graphs corresponds to a convex polyhedron, which are exactly the five Platonic solids. 
