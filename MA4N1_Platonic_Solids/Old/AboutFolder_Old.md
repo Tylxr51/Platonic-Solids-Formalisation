@@ -6,7 +6,7 @@ We decided to keep all of our original working files in for two reasons:
 
 ## File Breakdown:
 ### Definitions.lean *(Sean)*
-This file just contains our original definition of a platonic solids. This was where we realised that making rigorous and precise definitions in Lean was quite difficult, and we should probably pivot to an area with more concrete and easily formalisable definitions - graph theory
+This file just contains our original definition of a platonic solid. This was where we realised that making rigorous and precise definitions in Lean was quite difficult, and we should probably pivot to an area with more concrete and easily formalisable definitions - graph theory
 ### Inequality_Derivation_Theorem.lean *(Tyler)*
 This contains the derivation of $(m-2)*(n-2)<4$ where all of the variables are just abstract things and have no relation to any actual definitions. This was very helpful, because it meant that when we did actually have proper definitions and theorems, we could just plug them in and it all worked out nicely :)
 ### Simple_Graph_Theory.lean *(Sean)*

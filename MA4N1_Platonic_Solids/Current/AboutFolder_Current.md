@@ -14,11 +14,13 @@ This file contains definitions and lemmas required to prove the handshake lemma 
 This file contains definitions and lemmas required to prove the handshake lemma for undirected edges. The code in this file originated from $\verb+Undirected_Edges.lean+$
 
 ### File4_PlatonicGraphDefs.lean
-This file contains structures, definition, and lemmas required to connect all of the graph theory to the inequality derivation. It contains the $\verb+PlatonicGraph+$ structure, an assumption about Euler's Characteristic Formula, and some lemmas that allow us to use the Handshake lemma defined in $\verb+File3+$ on PlatonicGraphs. The code in this file originated from $\verb+Simple_Graph_Theory.lean+$
+This file contains structures, definition, and lemmas required to connect all of the graph theory to the inequality derivation. It contains the $\verb+PlatonicGraph+$ structure, an assumption about Euler's Characteristic Formula, and some lemmas that allow us to use the Handshake lemma defined in $\verb+File3_UndirectedEdgeHandshake.lean+$ on PlatonicGraphs. The code in this file originated from $\verb+Simple_Graph_Theory.lean+$
 
 ### File5a_InequalityDerivationTheorem.lean
 This file contains a theorem that states if we have a PlatonicGraph with $m>2$ and $n>2$, then we get $(m-2)*(n-2)<4$. The code in this file originated from $\verb+Inequality_Derivation_Theorem.lean+$
 
 ### File5b_InequalityDerivationLemmas.lean
-This file contains lemmas that are required for the proof of the theorem in $\verb+File5a+$. They are separated into a different file to make the main theorem file cleaner and more focused. 
-####
+This file contains lemmas that are required for the proof of the theorem in $\verb+File5a_InequalityDerivationTheorem.lean+$. They are separated into a different file to make the main theorem file cleaner and more focused. 
+
+### File6_InequalitySolutionClassification.lean
+This file contains the solution set to the inequality derived by platonic_inequality in $\verb+File5a_IequalityDerivationTheorem+$ and a classification of each solution with their corresponding graph names.

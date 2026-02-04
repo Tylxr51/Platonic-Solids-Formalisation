@@ -104,7 +104,7 @@ lemma ThreeConnectedGraph.toConnectedGraph (X : FinGraph) (TC : ThreeConnectedGr
 
 
 
--- Define Planar Graph as Finite Graph that is Planar (not defined) and has Faces
+-- Define Planar Graph as Finite Graph that is Planar (not defined) and has Faces (not defined)
 structure PlanarGraph (X : FinGraph) where
     isPlanar : Prop := True
 
@@ -114,14 +114,17 @@ structure PlanarGraph (X : FinGraph) where
 
 attribute [instance] PlanarGraph.instFace
 
+-- Define the cardinality of the set of faces now we have (somewhat) defined them
 def PlanarGraph.FCard {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
     Fintype.card Pl.Face
+
 
 noncomputable
 def PlanarGraph.FaceDegSum {X : FinGraph} (Pl : PlanarGraph X) : ℕ :=
     ∑ f : Pl.Face, Pl.FaceDeg f
 
 
+-- here we state Euler's Characteristic Formula but don't prove it. Check `README.md` for more info
 theorem PlanarGraph.hEuler (X : FinGraph)
     (Pl : PlanarGraph X) (C : ConnectedGraph X.G) :
     (X.VCard : ℤ) - (X.ECard : ℤ) + (Pl.FCard : ℤ) = 2 := by
@@ -129,7 +132,6 @@ theorem PlanarGraph.hEuler (X : FinGraph)
 
 -- now we have a definition of regularity, we need to show that FinGraph.Degsum X = n*V so we
 -- can apply our UndirHandshake theorem
-
 lemma Degsum_eq_n_mul_VCard (X : FinGraph) (R : RegularGraph X) :
     FinGraph.Degsum X = R.n * X.VCard := by
         unfold FinGraph.Degsum
@@ -142,25 +144,36 @@ theorem nV_UndirHandshake (X : FinGraph) (R : RegularGraph X) [DecidableRel X.G.
         apply UndirHandshake
 
 
-
+-- Make a structure for a Platonic Graph. We define it as a Finite, Regular, ThreeConnected,
+-- Planar Graph, where each face has the same number of edges which is greater than 2,
+-- the degree of each vertex is greater than 2, and each edge lies on the boundary of
+-- exactly 2 faces
 structure PlatonicGraph where
+    -- Bring in strucures we have already defined
     X : FinGraph
     regular : RegularGraph X
     threeConnected : ThreeConnectedGraph X
     planar : PlanarGraph X
 
+    -- Create m
     m : ℕ
 
+    -- Assumption that each face has the same number of edges
     uniformFaces : ∀ f1 f2 : planar.Face, planar.FaceDeg f1 = planar.FaceDeg f2
 
+    -- Define m
     f₀ : planar.Face
     hmdef : m = planar.FaceDeg f₀
 
-
+    -- Assume m > 2, n > 2 and the set of vertices is not empty
     nonemptyVerts : Nonempty X.VertSet
     hmgt2 : m > 2
     hngt2 : regular.n > 2
 
+    -- This equation states that each edge lies on the boundary of exactly 2 faces.
+    -- We are not able to prove this because we do not have a formal definition of a face.
+    -- Otherwise, we could just define a graph with the set of vertices as the set of faces
+    -- (the dual graph), and then apply UndirHandshake.
     hFaceHandshake : planar.FaceDegSum = 2 * X.ECard
 
 
