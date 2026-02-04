@@ -81,8 +81,7 @@ lemma sym2_comm {VertSet : Type*} (u v : VertSet) :
 -- It is clear that the only way to represent {u, v} is by either (u, v) or (v, u) and so this is
 -- what we want to show next
 lemma sym2_classify {VertSet : Type*} (u1 v1 u2 v2 : VertSet)
-    (h : Sym2.mk (u1, v1) = Sym2.mk (u2, v2)) :
-(u1 = u2 ∧ v1 = v2) ∨ (u1 = v2 ∧ v1 = u2) := by
+    (h : Sym2.mk (u1, v1) = Sym2.mk (u2, v2)) : (u1 = u2 ∧ v1 = v2) ∨ (u1 = v2 ∧ v1 = u2) := by
     have h1 : ((u1, v1) = (u2, v2)) ∨ ((u1, v1) = (u2, v2).swap) := by
         exact (Sym2.mk_eq_mk_iff (p := (u1, v1)) (q := (u2, v2))).1 h
 
@@ -132,7 +131,9 @@ instance (X : FinGraph) (ue : ↑(UndirEdge X.G)) : Fintype (pre_image X ue) := 
 
 -- The following definition will take a pair of vertices u v and a proof of adjacency to construct
 -- the directed edge (u, v)
+
 def DirEdgeBuild (X : FinGraph) (u v : X.VertSet) (h : X.G.adj u v) : DirEdge X.G := ⟨(u, v), h⟩
+
 -- Now this gives us, given a pair of vertices and an adjacency proof h : X.G.adj u v, the
 -- following:
     -- ⟨(u, v), h⟩ via DirEdgeBuild X u v h
@@ -149,9 +150,9 @@ lemma characterise_members (X : FinGraph) (u v : X.VertSet) (de : DirEdge X.G) :
                     simpa [VertSet_to_Sym2] using heq1
                 exact (sym2_classify (u1 := de.1.1) (v1 := de.1.2) (u2 := u) (v2 := v) this)
 
-        -- We have two separate cases to consider, (↑e).1 = u ∧ (↑e).2 = v,
-        -- and (↑e).1 = v ∧ (↑e).2 = u
-        -- So can split into the left and right hand sides of 'or' (i.e ∨)
+            -- We have two separate cases to consider, (↑e).1 = u ∧ (↑e).2 = v,
+            -- and (↑e).1 = v ∧ (↑e).2 = u
+            -- So can split into the left and right hand sides of 'or' (i.e ∨)
             cases ha with
             | inl huv =>
                 left
@@ -218,7 +219,7 @@ Fintype.card (pre_image X ue) = 2 := by
     have hx : Sym2.mk (u, v) = ue.1 := by
         simpa [VertSet_to_Sym2] using h
 
-  -- Define the elements 'a' and 'b' of the pre-image
+    -- Define the elements 'a' and 'b' of the pre-image
     let a : pre_image X ue :=
         ⟨⟨(u, v), huv⟩, by
         simpa [VertSet_to_Sym2] using hx⟩
@@ -232,7 +233,7 @@ Fintype.card (pre_image X ue) = 2 := by
             _ = ue.1 := hx
         simpa [VertSet_to_Sym2] using this⟩
 
-  -- Can now use loopless to show that a and b are distinct.
+    -- Can now use loopless to show that a and b are distinct.
     have hneq : a ≠ b := by
         intro heq
         have hdir : (a.1 : DirEdge X.G) = b.1 := by
@@ -243,8 +244,8 @@ Fintype.card (pre_image X ue) = 2 := by
             exact congrArg Prod.fst hpair
         exact (adj_neq X.G u v huv) huv_eq
 
-  -- We show now that every element of the pre-image is either 'a' or 'b', thus there are at
-  -- most 2 elements of the pre-image
+    -- We show now that every element of the pre-image is either 'a' or 'b', thus there are at
+    -- most 2 elements of the pre-image
     have cover : ∀ y: pre_image X ue, y = a ∨ y = b := by
         intro y
         -- Rewriting in terms of 'u' and 'v' allows me to use the characterisation lemma I proved
@@ -268,9 +269,9 @@ Fintype.card (pre_image X ue) = 2 := by
             apply Subtype.ext
             simpa [b] using hp
 
-  -- To conclude that the pre-image has size 2, we construct an equivalence with Fin 2, the
-  -- standard type of size 2. We construct a map forwards & backwards, and then show that the
-  -- composition of them is the iddntity on each side.
+    -- To conclude that the pre-image has size 2, we construct an equivalence with Fin 2, the
+    -- standard type of size 2. We construct a map forwards & backwards, and then show that the
+    -- composition of them is the iddntity on each side.
     classical
     let e2 : (pre_image X ue) ≃ Fin 2 :=
     { -- First, map a ↦ 0, b ↦ 1
@@ -307,7 +308,7 @@ Fintype.card (pre_image X ue) = 2 := by
                     exact hneq (h.symm)
                 simp [hbneqa, hi0] }
 
-  -- Equivalent finite types have the same cardinality, using card (Fin 2) = 2
+    -- Equivalent finite types have the same cardinality, using card (Fin 2) = 2
     have hcard2 : Fintype.card (pre_image X ue) = Fintype.card (Fin 2) :=
         Fintype.card_congr e2
     simpa using hcard2
@@ -326,6 +327,7 @@ def to_Undir (X : FinGraph) (de : DirEdge X.G) :
 noncomputable
 def pre_image_equiv (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
     pre_image X ue ≃ {de : DirEdge X.G // to_Undir X de = ue} := by
+
 -- We have the functions VertSet_to_Sym2 : DirEdge → Sym2 VertSet, and
 -- to_Undir : DirEdge → UndirEdge
 -- So while VertSet_to_Sym2 maps directly into Sym2 VertSet, to_Undir instead takes the result as an
@@ -348,31 +350,31 @@ def pre_image_equiv (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
 -- undirected edges
 theorem card_DirEdge_eq_two_card_UndirEdge (X : FinGraph) :
     Fintype.card (DirEdge X.G) = 2 * Fintype.card (↑(UndirEdge X.G)) := by
-  classical
-  let f : DirEdge X.G → ↑(UndirEdge X.G) := to_Undir X
+        classical
+        let f : DirEdge X.G → ↑(UndirEdge X.G) := to_Undir X
 
-  calc
-    Fintype.card (DirEdge X.G)
-        = Fintype.card (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) := by
-          -- domain ≃ disjoint union of fibers
-          simpa using (Fintype.card_congr (Equiv.sigmaFiberEquiv f)).symm
-    _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card {de : DirEdge X.G // f de = ue} := by
-          -- card of sigma = sum of cards
-          simp
-    _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card (pre_image X ue) := by
-          -- replace fibers with your `pre_image` via the equivalence
-          refine Finset.sum_congr rfl ?_
-          intro ue _
-          simpa [f] using (Fintype.card_congr (pre_image_equiv X (ue := ue))).symm
-    _ = ∑ _ue : ↑(UndirEdge X.G), 2 := by
-          -- each preimage has card 2
-          refine Finset.sum_congr rfl ?_
-          intro ue _
-          simpa using (pre_image_card_eq_2 X (ue := ue))
-    _ = 2 * Fintype.card (↑(UndirEdge X.G)) := by
-          -- sum of constant = constant * number of terms
-          simp [Finset.card_univ]
-          ring
+        calc
+            Fintype.card (DirEdge X.G)
+                = Fintype.card (Σ ue : ↑(UndirEdge X.G), {de : DirEdge X.G // f de = ue}) := by
+                -- domain ≃ disjoint union of fibers
+                simpa using (Fintype.card_congr (Equiv.sigmaFiberEquiv f)).symm
+            _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card {de : DirEdge X.G // f de = ue} := by
+                -- card of sigma = sum of cards
+                simp
+            _ = ∑ ue : ↑(UndirEdge X.G), Fintype.card (pre_image X ue) := by
+                -- replace fibers with your `pre_image` via the equivalence
+                refine Finset.sum_congr rfl ?_
+                intro ue _
+                simpa [f] using (Fintype.card_congr (pre_image_equiv X (ue := ue))).symm
+            _ = ∑ _ue : ↑(UndirEdge X.G), 2 := by
+                -- each preimage has card 2
+                refine Finset.sum_congr rfl ?_
+                intro ue _
+                simpa using (pre_image_card_eq_2 X (ue := ue))
+            _ = 2 * Fintype.card (↑(UndirEdge X.G)) := by
+                -- sum of constant = constant * number of terms
+                simp [Finset.card_univ]
+                ring
 
 
 -- We have almost everything we need now, but we first need to connect what is in this file to

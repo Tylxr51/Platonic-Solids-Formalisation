@@ -28,7 +28,7 @@ attribute [instance] FinGraph.instAdj
 
 -- Standard definition of the neighbourhood of a vertex
 def SimpGraph.Nbhd {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) : Set VertSet :=
-  {u | G.adj v u}
+    {u | G.adj v u}
 
 
 -- The adjacent edgeset of a vertex v is the set of directed edges from v.
@@ -70,4 +70,4 @@ def FinGraph.Deg (X : FinGraph) (v : X.VertSet) : ℕ :=
 -- Degsum is the sum of the degrees
 noncomputable
 def FinGraph.Degsum (X : FinGraph) : ℕ :=
-  ∑ v : X.VertSet, FinGraph.Deg X v
+    ∑ v : X.VertSet, FinGraph.Deg X v
