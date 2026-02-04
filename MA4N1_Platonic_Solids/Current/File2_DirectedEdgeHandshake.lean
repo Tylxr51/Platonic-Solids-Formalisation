@@ -1,16 +1,15 @@
 import MA4N1_Platonic_Solids.Current.File1_SimpleGraphDefs
 
 
--- Defining the directed edgeset of a graph. Again, since we are working with
--- simple graphs this should really be unordered pairs.
--- Should be able to correct this with Sym2 but I was too far in by the time
--- I noticed
+-- Defining the directed edgeset of a graph. Again, since we are working with simple graphs this
+-- should really be unordered pairs. Should be able to correct this with Sym2 but I was too far in
+-- by the time I noticed.
 def SimpGraph.DirEdgeset {VertSet : Type*} (G : SimpGraph VertSet) :
     Set (VertSet × VertSet) := { (u,v) | G.adj u v }
 
 
--- Our first lemma, showing that the union of all the adjacent edgesets of
--- each vertex is the edgeset of the graph #noway
+-- Our first lemma, showing that the union of all the adjacent edgesets of each vertex is the
+-- edgeset of the graph #noway
 lemma SimpGraph.EdgesetEqUnionAdjEdge {VertSet : Type*} (G : SimpGraph VertSet) :
 (⋃ v, SimpGraph.AdjEdgeset G v) = SimpGraph.DirEdgeset G :=  by
     ext
@@ -39,8 +38,7 @@ lemma SimpGraph.EdgesetEqUnionAdjEdge {VertSet : Type*} (G : SimpGraph VertSet) 
     apply h3
 
 
--- Similar to what we did for AdjEdgeset, we need that if the graph is finite
--- then so is the edgeset
+-- Similar to what we did for AdjEdgeset, we need that if the graph is finite then so is the edgeset
 noncomputable
 instance FinGraph.FinEdgeset (X : FinGraph) :
     Fintype ↑(X.G.DirEdgeset) := by
@@ -51,7 +49,7 @@ instance FinGraph.FinEdgeset (X : FinGraph) :
     exact h1.fintype
 
 
--- and need a definition to convert the edgeset to a finset in this case
+-- Need a definition to convert the edgeset to a finset in this case
 noncomputable
 def FinGraph.DirNoEdges (X : FinGraph) : ℕ :=
     Finset.card (SimpGraph.DirEdgeset X.G).toFinset
@@ -87,10 +85,9 @@ lemma SimpGraph.DirEdgesetDisjoint {VertSet : Type*} (G : SimpGraph VertSet) :
     contradiction
 
 
--- I then realised that I actually need this for the finite case and lean
--- is too thick to easily go between the two. This could probably be proven
--- fairly quickly from the previous lemma, but I just copy and pasted that
--- proof and then edited it to make it work
+-- I then realised that I actually need this for the finite case and lean is too thick to easily go
+-- between the two. This could probably be proven fairly quickly from the previous lemma, but I
+-- just copy and pasted that proof and then edited it to make it work.
 lemma FinGraph.DirEdgeFinsetDisjoint (X : FinGraph) :
 ∀ ⦃v u : X.VertSet⦄, v ≠ u → Disjoint (X.AdjEdgeFinset v) (X.AdjEdgeFinset u) := by
     intro u v hneq

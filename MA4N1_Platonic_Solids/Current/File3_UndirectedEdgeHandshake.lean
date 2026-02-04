@@ -21,31 +21,28 @@ def DirEdge {VertSet : Type*} (G : SimpGraph VertSet) :
 -- Though conceptually the same as DirEdgeset, I expect this to be easier for working with functions
 -- especially considering it encodes a pair (a vertices pair and their proof of adjacency)
 
-
 def VertSet_to_Sym2 {VertSet : Type*} (G : SimpGraph VertSet) :
     DirEdge G → Sym2 VertSet := fun e => Sym2.mk e.1
-
 
 def UndirEdge {VertSet : Type*} (G : SimpGraph VertSet) :
     Set (Sym2 VertSet) := Set.range (VertSet_to_Sym2 G)
 
 
-
 -- We need to determine that the set of undirected edges is finite in order to count them.
---Since we know that V is finite, we know that V × V will be finite
+-- Since we know that X.VertSet is finite, we know that X.VertSet × X.VertSet will be finite
 
--- We us noncomputable as it will need a classical reasoning. We also use 'instance' so that,
--- given a finite vertex type V, we can treat G.DirEdge as a finite type as well
+-- We use noncomputable as it will need a classical reasoning. We also use 'instance' so that,
+-- given a finite vertex type VertSet, we can treat DirEdge X.G as a finite type as well
 noncomputable
 instance (X : FinGraph) : Fintype (DirEdge X.G) := by
     classical
-    -- Prove G.DirEdge has finitely many elements
+    -- Prove DirEdge X.G has finitely many elements
     have : Finite (DirEdge X.G) := by
-        -- V × V is finite because V is fintype, can inject G.DirEdge into V × V
+        -- X.VertSet × X.VertSet is finite because X.VertSet is fintype, can inject DirEdge X.G
+        -- into X.VertSet × X.VertSet
         refine Finite.of_injective (fun e : DirEdge X.G => e.1) ?_
-        -- Now prove injectiviyt of the function
+        -- Now prove injectivity of the function
         intro a b hab
-        -- equality of subtypes is determined by equality of underlying values
         apply Subtype.ext
         simpa using hab
     exact Fintype.ofFinite (DirEdge X.G)
@@ -101,7 +98,7 @@ lemma sym2_classify {VertSet : Type*} (u1 v1 u2 v2 : VertSet)
         exact ⟨rfl, rfl⟩
 
 
--- Now we want to approach the undirected version of the handshaking lemma. to do so, we need to
+-- Now we want to approach the undirected version of the handshaking lemma. To do so, we need to
 -- define the undirected edge set, define a map from the directed edges (u, v) to undirected
 -- edges {u, v}, and show this map is 2-to-1. That is, every {u, v} with adj u v has two distinct
 -- direct representatives (u, v) or (v, u). We then use this to conclude that
@@ -111,24 +108,21 @@ def UndirEdgeNum (X : FinGraph) [DecidableRel X.G.adj] : ℕ :=
     Finset.card ((UndirEdge X.G).toFinset)
 
 
--- We want that the pre-image of an undirected edge 'a' under the map V_to_Sym2 has size 2 for any
--- choice of undirected edge 'a'. We need to define this pre-image first.
--- Recall that we defined DirEdge to be a pair of data, namely a pair of ordered vertices, and a
--- proof that u and v are adjacent via adj u v.
+-- We want that the pre-image of an undirected edge 'ue' under the map VertSet_to_Sym2 has size 2
+-- for any choice of undirected edge 'ue'. We need to define this pre-image first.
 def pre_image (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
     Type _ := {e : DirEdge X.G // VertSet_to_Sym2 X.G e = ue}
 
--- So the pre-image should, for h : G.adj u v, consist of
+-- So the pre-image should, for h : X.G.adj u v, consist of
     -- ⟨(u, v), h⟩
-    -- ⟨(v, u), G.symm h⟩
+    -- ⟨(v, u), X.G.symm h⟩
 -- distinct via adj_neq
--- So the enxt thing to do is to prove that pre_image is finite.
-
+-- So the next thing to do is to prove that pre_image is finite.
 
 noncomputable
 instance (X : FinGraph) (ue : ↑(UndirEdge X.G)) : Fintype (pre_image X ue) := by
     classical
-    -- As we previously did, probably easier to show finiteness by injecting into G.DirEdge
+    -- As we previously did, probably easier to show finiteness by injecting into DirEdge X.G
     have : Finite (pre_image X ue) := by
         refine Finite.of_injective (fun y : pre_image X ue => y.1) ?_
         intro a b hab
@@ -139,15 +133,16 @@ instance (X : FinGraph) (ue : ↑(UndirEdge X.G)) : Fintype (pre_image X ue) := 
 -- The following definition will take a pair of vertices u v and a proof of adjacency to construct
 -- the directed edge (u, v)
 def DirEdgeBuild (X : FinGraph) (u v : X.VertSet) (h : X.G.adj u v) : DirEdge X.G := ⟨(u, v), h⟩
--- Now this gives us, given a pair of vertices and an adjacency proof h : G.adj u v, the following:
-    -- ⟨(u, v), h⟩ via DirEdgeBuild G h
-    -- ⟨(v, u) G.symm h⟩, via DirEdgeBuild G (G.symm h)
+-- Now this gives us, given a pair of vertices and an adjacency proof h : X.G.adj u v, the
+-- following:
+    -- ⟨(u, v), h⟩ via DirEdgeBuild X u v h
+    -- ⟨(v, u) G.symm h⟩, via DirEdgeBuild X u v (X.G.symm h)
 
--- Our aim now is to prove that {u, v} has exactly the two elements e1 and e2 stated above. We can
--- characterise {u, v} by its members (u, v) & (v, u)
+-- Our aim now is to prove that {u, v} has exactly the two elements. We can characterise {u, v} by
+-- its members (u, v) & (v, u)
 lemma characterise_members (X : FinGraph) (u v : X.VertSet) (de : DirEdge X.G) :
     VertSet_to_Sym2 X.G de = Sym2.mk (u, v) ↔ de.1 = (u, v) ∨ de.1 = (v, u) := by
-        constructor -- Break into the forward and backward directions
+        constructor
         ·   intro heq1
             have ha : (de.1.1 = u ∧ de.1.2 = v) ∨ (de.1.1 = v ∧ de.1.2 = u) := by
                 have : Sym2.mk de.1 = Sym2.mk (u, v) := by
@@ -177,29 +172,28 @@ lemma characterise_members (X : FinGraph) (u v : X.VertSet) (de : DirEdge X.G) :
 
 
 -- While this lemma says that any directed edge that maps to {u, v} must have the pair (u, v) or
--- (v, u), we need actaully show they exist as directed edges in G.DirEdge, and then show that they
--- are distinct. Thus we cna then conclude that the cardinality of the pre-image is 2, i.e that
+-- (v, u), we need actaully show they exist as directed edges in DirEdge X.G, and then show that
+-- they are distinct. Thus we can then conclude that the cardinality of the pre-image is 2, i.e that
 -- there are exactly 2 directed edges associated to an undirected edge.
 
--- To begin with this, we need to pick a representative edge . Since we have 'x : ↑(G.UndirEdge)',
--- then we have some x.1 in the range of G.V_to_Sym2, so there exists an edge e with
--- G.V_to_Sym2 e = x.1
+-- To begin with this, we need to pick a representative edge . Since we have
+-- 'ue : ↑(UndirEdge X.G)', then we have some ue.1 in the range of VertSet_to_Sym2 X.G, so there
+-- exists an edge e with VertSet_to_Sym2 X.G e = ue.1
 
 
 noncomputable
 def chooseDirEdge (X : FinGraph) (ue : ↑(UndirEdge X.G)) : DirEdge X.G := by
     classical
     have h1 : ue.1 ∈ UndirEdge X.G := ue.property
-    -- Recall UndirEdge = Set.range (V_to_Sym2)
+    -- Recall UndirEdge = Set.range (VertSet_to_Sym2)
     dsimp [UndirEdge] at h1
     have h2 : ∃ e : DirEdge X.G, VertSet_to_Sym2 X.G e = ue.1 :=
             (Set.mem_range).1 h1
     exact Classical.choose h2
 
--- The above definition says that, given an undirected edge x, pick an edge e that maps to it
+-- The above definition says that, given an undirected edge ue, pick an edge e that maps to it
 -- The following lemma then confirms that the directed edge chosen by the above definition really
--- does map back to x.
-
+-- does map back to ue.
 
 lemma chooseDirEdge_maps_back (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
 VertSet_to_Sym2 X.G (chooseDirEdge X ue) = ue.1 := by
@@ -211,10 +205,10 @@ VertSet_to_Sym2 X.G (chooseDirEdge X ue) = ue.1 := by
     exact Classical.choose_spec h2
 
 
--- We will now prove that the cardinality of 'pre_image x' is 2
+-- We will now prove that the cardinality of 'pre_image ue' is 2
 lemma pre_image_card_eq_2 (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
 Fintype.card (pre_image X ue) = 2 := by
--- Need classical as we work on the assumption x is in the range of V_to_Sym2
+-- Need classical as we work on the assumption ue is in the range of VertSet_to_Sym2
     classical
     set de : DirEdge X.G := chooseDirEdge X ue with he_def
     have h : VertSet_to_Sym2 X.G de = ue.1 := by
@@ -238,8 +232,7 @@ Fintype.card (pre_image X ue) = 2 := by
             _ = ue.1 := hx
         simpa [VertSet_to_Sym2] using this⟩
 
-  -- Can now use loopless to show that a and b are distinct, i.e. if (u, v) = (v, u), then
-  -- u = v, contradicting looplessness
+  -- Can now use loopless to show that a and b are distinct.
     have hneq : a ≠ b := by
         intro heq
         have hdir : (a.1 : DirEdge X.G) = b.1 := by
@@ -286,10 +279,9 @@ Fintype.card (pre_image X ue) = 2 := by
         -- Then the inverse map, 0 ↦ a, 1 ↦ b
         invFun := fun i =>
         if hi0 : i = (0 : Fin 2) then a else b
-        --Prove invFun ∘ toFun = id
+        -- invFun ∘ toFun = id
         left_inv := by
             intro y
-            -- We now use the cover lemma to get y = a ∨ b, and separate into cases
             rcases cover y with hya | hyb
             ·   subst hya
                 simp
@@ -299,7 +291,7 @@ Fintype.card (pre_image X ue) = 2 := by
                     intro h
                     exact hneq (h.symm)
                 simp [hba]
-        -- Prove toFun ∘ invFun = id
+        -- toFun ∘ invFun = id
         right_inv := by
             intro i
             -- Fin 2 has only 0 or 1, so can split into cases i = 0 or i = 1
@@ -324,7 +316,6 @@ Fintype.card (pre_image X ue) = 2 := by
 -- Now we are done with this, we need to relate it back to the original handshake lemma
 -- and conclude the new result. This requires linking the new and old definitions via maps
 
-
 -- The following definition will map a directed edge to its correpsonding undirected edge
 noncomputable
 def to_Undir (X : FinGraph) (de : DirEdge X.G) :
@@ -335,10 +326,11 @@ def to_Undir (X : FinGraph) (de : DirEdge X.G) :
 noncomputable
 def pre_image_equiv (X : FinGraph) (ue : ↑(UndirEdge X.G)) :
     pre_image X ue ≃ {de : DirEdge X.G // to_Undir X de = ue} := by
--- We have the functions V_to_Sym2 : DirEdge → Sym2 V, and to_Undir : DirEdge → UndirEdge
--- So while V_to_Sym2 maps directly into Sym2 V, to_Undir instead takes the result as an element
--- of the subtype UndirEdge = Set.range V_to_Sym2. This equivalence identifies that the objects
--- are mathematically the same, the directed edge mapping to a given undirected edge.
+-- We have the functions VertSet_to_Sym2 : DirEdge → Sym2 VertSet, and
+-- to_Undir : DirEdge → UndirEdge
+-- So while VertSet_to_Sym2 maps directly into Sym2 VertSet, to_Undir instead takes the result as an
+-- element of the subtype UndirEdge = Set.range VertSet_to_Sym2. This equivalence identifies that
+-- the objects are mathematically the same, the directed edge mapping to a given undirected edge.
     refine
     {   toFun := fun y => ⟨y.1, ?_⟩
         invFun := fun y => ⟨y.1, ?_⟩
@@ -384,10 +376,8 @@ theorem card_DirEdge_eq_two_card_UndirEdge (X : FinGraph) :
 
 
 -- We have almost everything we need now, but we first need to connect what is in this file to
--- Sean's Simple_Graph_Theory file. To do this, we need to show that 'DirNoEdges = |DirEdges|',
+-- File2_DirectedEdgeHandshake file. To do this, we need to show that 'DirNoEdges = |DirEdges|',
 -- bridging the two deifnitions, and then that 'UndirEdgeNum = |UndirEdge|'
--- To do so, we will use a similar ideas as we did previously, write a 'def' using an equivalence.
-
 
 noncomputable
 def DirEdge_equiv_DirEdgeset (X : FinGraph) : DirEdge X.G ≃ ↑(SimpGraph.DirEdgeset X.G) :=  by
@@ -402,11 +392,10 @@ def DirEdge_equiv_DirEdgeset (X : FinGraph) : DirEdge X.G ≃ ↑(SimpGraph.DirE
     ·   simp
     ·   aesop
 
-
 lemma DirNoEdges_eq_card_DirEdge (X : FinGraph) [DecidableRel X.G.adj] :
     FinGraph.DirNoEdges X = Fintype.card (DirEdge X.G) := by
     classical
-    -- We first convert DirNoEdges into the cardinality of the subtype ↑(G.DirEdgeset)
+    -- We first convert DirNoEdges into the cardinality of the subtype ↑(DirEdgeset X.G)
     have h1 : FinGraph.DirNoEdges X = Fintype.card (↑(SimpGraph.DirEdgeset X.G)) := by
         simp [FinGraph.DirNoEdges]
     have h2 : Fintype.card (↑(SimpGraph.DirEdgeset X.G)) = Fintype.card (DirEdge X.G) := by
@@ -415,7 +404,7 @@ lemma DirNoEdges_eq_card_DirEdge (X : FinGraph) [DecidableRel X.G.adj] :
 
 
 -- We now have the undirected version of the statement, that UndirEdgeNum is the cardinality of the
---  subtype ↑(G.UndirEdge)
+--  subtype ↑(UndirEdge X.G)
 lemma UndirEdgeNum_eq_card_UndirEdge (X : FinGraph) [DecidableRel X.G.adj] :
     UndirEdgeNum X = Fintype.card (↑(UndirEdge X.G)) := by
         classical

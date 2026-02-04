@@ -32,13 +32,13 @@ def SimpGraph.Nbhd {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) : Set
 
 
 -- The adjacent edgeset of a vertex v is the set of directed edges from v.
--- As with many of the following definitions, this should technically be
--- unordered pairs but in this case it doesn't make much difference for us
+-- As with many of the following definitions, this should technically be unordered pairs but in
+-- this case it doesn't make much difference for us
 def SimpGraph.AdjEdgeset {VertSet : Type*} (G : SimpGraph VertSet) (v : VertSet) :
     Set (VertSet × VertSet) := {(v',u) : VertSet × VertSet | v'=v ∧ u ∈ SimpGraph.Nbhd G v}
 
 
--- Needed to show that if V is finite then so is any adjacent edgeset
+-- Needed to show that if X.VertSet is finite then so is any adjacent edgeset
 noncomputable
 instance FinGraph.FinAdjEdgeset (X : FinGraph) (v : X.VertSet) :
     Fintype ↑(X.G.AdjEdgeset v) := by
@@ -51,18 +51,17 @@ instance FinGraph.FinAdjEdgeset (X : FinGraph) (v : X.VertSet) :
     exact h1.fintype
 
 
--- I needed to be able to convert the adjacent edgeset to a finset for our
--- argument in the case that V is finite. That is what this defintion does
+-- I needed to be able to convert the adjacent edgeset to a finset for our argument in the case
+-- that X.VertSet is finite. That is what this defintion does
 noncomputable
 def FinGraph.AdjEdgeFinset (X : FinGraph) (v : X.VertSet) :
     Finset (X.VertSet × X.VertSet) :=
     (X.G.AdjEdgeset v).toFinset
 
 
--- Typically, the degree might be defined as the cardinality of the neighbourhood
--- but it is easy to see that this definition is equivalent.
--- It would also be possible to generalise this definition to locally finite
--- graphs, but that was beyond the scope of the project.
+-- Typically, the degree might be defined as the cardinality of the neighbourhood but it is easy to
+-- see that this definition is equivalent. It would also be possible to generalise this definition
+-- to locally finite graphs, but that was beyond the scope of the project.
 noncomputable
 def FinGraph.Deg (X : FinGraph) (v : X.VertSet) : ℕ :=
     Finset.card (FinGraph.AdjEdgeFinset X v)
